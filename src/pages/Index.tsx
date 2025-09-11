@@ -19,29 +19,12 @@ const Index = () => {
   const [filters, setFilters] = useState<FilterOptions>({
     userType: 'all',
     ageRange: [16, 35],
+    distance: [10, 100],
     experience: [],
     position: [],
     location: [],
     status: 'all'
   });
-
-  const handleLogin = (credentials: { email: string; password: string }) => {
-    // Mock authentication
-    setIsAuthenticated(true);
-    setCurrentUser({ ...mockUser, name: credentials.email.split('@')[0] });
-  };
-
-  const handleRegister = (userData: { name: string; email: string; password: string; role: string }) => {
-    // Mock registration
-    setIsAuthenticated(true);
-    setCurrentUser({
-      name: userData.name,
-      role: userData.role as 'player' | 'team' | 'admin',
-      avatar: "/placeholder.svg",
-      experience: "15+ years coaching",
-      location: "Austin, TX"
-    });
-  };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
@@ -64,6 +47,7 @@ const Index = () => {
     setFilters({
       userType: 'all',
       ageRange: [16, 35],
+      distance: [10, 100],
       experience: [],
       position: [],
       location: [],
@@ -91,10 +75,6 @@ const Index = () => {
     return true;
   });
 
-  if (!isAuthenticated) {
-    return <AuthForm onLogin={handleLogin} onRegister={handleRegister} />;
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <Header
@@ -119,6 +99,14 @@ const Index = () => {
           <Button
             size="lg"
             className="bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm"
+            onClick={() => {
+              const token = localStorage.getItem('authToken');
+              if (token) {
+                navigate('/create-post');
+              } else {
+                navigate('/signin');
+              }
+            }}
           >
             <Plus className="h-5 w-5 mr-2" />
             Create Your Listing
@@ -205,7 +193,14 @@ const Index = () => {
                 </div>
 
                 <Button className="bg-gradient-redwhiteblued hover:opacity-90 transition-opacity"
-                  onClick={() => navigate('/create-post')}>
+                  onClick={() => {
+                    const token = localStorage.getItem('authToken');
+                    if (token) {
+                      navigate('/create-post');
+                    } else {
+                      navigate('/signin');
+                    }
+                  }}>
                   <Plus className="h-4 w-4 mr-2" />
                   Post Listing
                 </Button>

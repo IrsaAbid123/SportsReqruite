@@ -26,6 +26,7 @@ export default function ProfilePage() {
     const [filters, setFilters] = useState<FilterOptions>({
         userType: 'all',
         ageRange: [16, 35],
+        distance: [10, 100],
         experience: [],
         position: [],
         location: [],

@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Calendar, MapPin, Clock, Star, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export interface Listing {
   id: string;
@@ -33,6 +34,7 @@ interface ListingCardProps {
 }
 
 export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) => {
+  const navigate = useNavigate()
   const isExpired = new Date(listing.expiryDate) < new Date();
   const timeAgo = new Date(listing.createdAt).toLocaleDateString();
 
@@ -157,8 +159,10 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
             </Button>
             <Button
               size="sm"
-              onClick={() => onContact?.(listing.id)}
-              disabled={listing.status === 'filled' || isExpired}
+              onClick={() =>
+                navigate('/chat')
+              }
+              // disabled={listing.status === 'filled' || isExpired}
               className={listing.status === 'available' && !isExpired
                 ? 'bg-gradient-redwhiteblued hover:opacity-90 transition-opacity'
                 : ''

@@ -75,6 +75,7 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     onLogin?.(loginData);
+    navigate("/");
   };
 
   const handleRegister = (e: React.FormEvent) => {
@@ -84,6 +85,7 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
       return;
     }
     onRegister?.(registerData);
+    navigate("/");
   };
 
   const handlePlacesChanged = () => {

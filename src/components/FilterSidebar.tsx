@@ -9,6 +9,7 @@ import { Filter, X } from "lucide-react";
 export interface FilterOptions {
   userType: 'all' | 'players' | 'teams';
   ageRange: [number, number];
+  distance: [number, number];
   experience: string[];
   position: string[];
   location: string[];
@@ -119,6 +120,23 @@ export const FilterSidebar = ({ filters, onFiltersChange, onClearFilters }: Filt
             min={16}
             max={35}
             step={1}
+            className="w-full"
+          />
+        </div>
+
+        <Separator />
+
+        {/* ✅ Distance Filter */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">
+            Distance: {filters.distance[0]} km - {filters.distance[1]} km
+          </Label>
+          <Slider
+            value={filters.distance}
+            onValueChange={(value) => updateFilter('distance', value)}
+            min={0}
+            max={100}
+            step={5}
             className="w-full"
           />
         </div>
