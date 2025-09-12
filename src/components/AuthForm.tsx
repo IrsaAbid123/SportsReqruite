@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Trophy, Users, Shield } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox"
 import { GoogleMap, useJsApiLoader, StandaloneSearchBox } from '@react-google-maps/api'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 interface AuthFormProps {
@@ -55,9 +56,13 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
     "College",
   ]
 
-  const experienceLevelOptions = ["A", "AA", "AAA", "Majors"]
+  const experienceLevelOptions = ["A", "AA", "AAA", "Majors", "NAIA", "D3", "D2", "D1"];
 
-  const positionOptions = ["C", "RHP", "LHP", "1B", "2B", "SS", "3B", "OF"]
+  const positionOptions = [
+    "Catcher", "Left Pitcher", "Right Pitcher", "First Base", "Second Base",
+    "Short Stop", "Third Base", "Left Outfield", "Center Outfield",
+    "Right Outfield", "DH",
+  ];
 
   const handleMultiSelect = (
     value: string,
@@ -247,69 +252,70 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
                   </div>
                   {(registerData.role === "player" || registerData.role === "team") && (
                     <>
-                      <div className="space-y-6">
-
-                        {/* Age Ranges */}
-                        <div className="space-y-3">
-                          <Label htmlFor="age-ranges">Age Ranges</Label>
-
-                          <div className="grid grid-cols-4 md:grid-cols-7 gap-2">
+                      {/* Age Range */}
+                      <div className="space-y-3">
+                        <Label htmlFor="age-ranges">Age Range</Label>
+                        <Select
+                          value={registerData.ageRanges[0] || ""}
+                          onValueChange={(val) =>
+                            setRegisterData({ ...registerData, ageRanges: [val] })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Age Range" />
+                          </SelectTrigger>
+                          <SelectContent>
                             {ageRangeOptions.map((age) => (
-                              <div key={age} className="flex items-center space-x-2">
-                                <Checkbox
-                                  id={`age-${age}`}
-                                  checked={registerData.ageRanges.includes(age)}
-                                  onCheckedChange={() => handleMultiSelect(age, registerData.ageRanges, "ageRanges")}
-                                />
-                                <Label htmlFor={`age-${age}`} className="text-sm cursor-pointer">
-                                  {age}
-                                </Label>
-                              </div>
+                              <SelectItem key={age} value={age}>
+                                {age}
+                              </SelectItem>
                             ))}
-                          </div>
-                        </div>
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                        {/* Experience Levels */}
-                        <div className="space-y-3">
-                          <Label htmlFor="experience-levels">Experience Levels</Label>
-
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      {/* Experience Level */}
+                      <div className="space-y-3">
+                        <Label htmlFor="experience-levels">Experience Level</Label>
+                        <Select
+                          value={registerData.experienceLevels[0] || ""}
+                          onValueChange={(val) =>
+                            setRegisterData({ ...registerData, experienceLevels: [val] })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Experience Level" />
+                          </SelectTrigger>
+                          <SelectContent>
                             {experienceLevelOptions.map((level) => (
-                              <div key={level} className="flex items-center space-x-2">
-                                <Checkbox
-                                  id={`exp-${level}`}
-                                  checked={registerData.experienceLevels.includes(level)}
-                                  onCheckedChange={() =>
-                                    handleMultiSelect(level, registerData.experienceLevels, "experienceLevels")
-                                  }
-                                />
-                                <Label htmlFor={`exp-${level}`} className="text-sm cursor-pointer">
-                                  {level}
-                                </Label>
-                              </div>
+                              <SelectItem key={level} value={level}>
+                                {level}
+                              </SelectItem>
                             ))}
-                          </div>
-                        </div>
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                        {/* Positions */}
-                        <div className="space-y-3">
-                          <Label htmlFor="positions">Positions</Label>
-
-                          <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                      {/* Position */}
+                      <div className="space-y-3">
+                        <Label htmlFor="positions">Position</Label>
+                        <Select
+                          value={registerData.positions[0] || ""}
+                          onValueChange={(val) =>
+                            setRegisterData({ ...registerData, positions: [val] })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Position" />
+                          </SelectTrigger>
+                          <SelectContent>
                             {positionOptions.map((position) => (
-                              <div key={position} className="flex items-center space-x-2">
-                                <Checkbox
-                                  id={`pos-${position}`}
-                                  checked={registerData.positions.includes(position)}
-                                  onCheckedChange={() => handleMultiSelect(position, registerData.positions, "positions")}
-                                />
-                                <Label htmlFor={`pos-${position}`} className="text-sm cursor-pointer">
-                                  {position}
-                                </Label>
-                              </div>
+                              <SelectItem key={position} value={position}>
+                                {position}
+                              </SelectItem>
                             ))}
-                          </div>
-                        </div>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </>
                   )}

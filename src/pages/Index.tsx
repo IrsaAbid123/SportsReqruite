@@ -18,11 +18,11 @@ const Index = () => {
   const [listings, setListings] = useState(mockListings);
   const [filters, setFilters] = useState<FilterOptions>({
     userType: 'all',
-    ageRange: [16, 35],
-    distance: [10, 100],
-    experience: [],
-    position: [],
-    location: [],
+    age: ["16u", "17u"],
+    distance: 10,
+    zipOrCityState: "",
+    experience: [] as string[],
+    position: [] as string[],
     status: 'all'
   });
 
@@ -46,11 +46,11 @@ const Index = () => {
   const clearFilters = () => {
     setFilters({
       userType: 'all',
-      ageRange: [16, 35],
-      distance: [10, 100],
-      experience: [],
-      position: [],
-      location: [],
+      age: [] as string[],
+      distance: 0,
+      zipOrCityState: "",
+      experience: [] as string[],
+      position: [] as string[],
       status: 'all'
     });
   };
@@ -185,7 +185,7 @@ const Index = () => {
                     <span>{filteredListings.length} listings found</span>
                     {(filters.userType !== 'all' || filters.status !== 'all' ||
                       filters.experience.length > 0) && (
-                        <Badge variant="outline" className="ml-2">
+                        <Badge variant="outline" className="ml-2 text-white">
                           Filtered
                         </Badge>
                       )}

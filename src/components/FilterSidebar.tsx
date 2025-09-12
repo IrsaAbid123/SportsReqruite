@@ -4,16 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 import { Filter, X } from "lucide-react";
 
 export interface FilterOptions {
-  userType: 'all' | 'players' | 'teams';
-  ageRange: [number, number];
-  distance: [number, number];
+  userType: "all" | "players" | "teams";
+  status: "all" | "available" | "filled";
+  age: string[];
+  distance: number;
+  zipOrCityState: string;
   experience: string[];
-  position: string[];
-  location: string[];
-  status: 'all' | 'available' | 'filled';
+  position: string[]
 }
 
 interface FilterSidebarProps {
@@ -22,47 +23,61 @@ interface FilterSidebarProps {
   onClearFilters: () => void;
 }
 
-const experienceLevels = [
-  'Beginner', 'Amateur', 'Semi-Pro', 'Professional', 'College', 'High School'
+const ages = [
+  "6u", "7u", "8u", "9u", "10u", "11u", "12u", "13u", "14u", "15u",
+  "16u", "17u", "18u", "College",
 ];
+
+const experienceLevels = ["A", "AA", "AAA", "Majors", "NAIA", "D3", "D2", "D1"];
 
 const positions = [
-  'Pitcher', 'Catcher', 'First Base', 'Second Base', 'Third Base', 'Shortstop',
-  'Left Field', 'Center Field', 'Right Field', 'Quarterback', 'Running Back',
-  'Wide Receiver', 'Tight End', 'Offensive Line', 'Defensive Line', 'Linebacker',
-  'Cornerback', 'Safety', 'Point Guard', 'Shooting Guard', 'Small Forward',
-  'Power Forward', 'Center'
+  "Catcher", "Left Pitcher", "Right Pitcher", "First Base", "Second Base",
+  "Short Stop", "Third Base", "Left Outfield", "Center Outfield",
+  "Right Outfield", "DH",
 ];
 
-const locations = [
-  'New York', 'California', 'Texas', 'Florida', 'Illinois', 'Pennsylvania',
-  'Ohio', 'Georgia', 'North Carolina', 'Michigan'
-];
+// predefined distance steps
+const distanceMarks = [5, 10, 20, 50, 100];
 
-export const FilterSidebar = ({ filters, onFiltersChange, onClearFilters }: FilterSidebarProps) => {
+export const FilterSidebar = ({
+  filters,
+  onFiltersChange,
+  onClearFilters,
+}: FilterSidebarProps) => {
+  // ✅ fallback arrays to avoid includes on undefined
+  const safeFilters: FilterOptions = {
+    ...filters,
+    age: filters.age ?? [],
+    experience: filters.experience ?? [],
+    position: filters.position ?? [],
+  };
+
   const updateFilter = (key: keyof FilterOptions, value: any) => {
     onFiltersChange({
-      ...filters,
-      [key]: value
+      ...safeFilters,
+      [key]: value,
     });
   };
 
-  const toggleArrayFilter = (key: 'experience' | 'position' | 'location', value: string) => {
-    const currentArray = filters[key];
+  const toggleArrayFilter = (
+    key: "age" | "experience" | "position",
+    value: string
+  ) => {
+    const currentArray = safeFilters[key];
     const newArray = currentArray.includes(value)
-      ? currentArray.filter(item => item !== value)
+      ? currentArray.filter((item) => item !== value)
       : [...currentArray, value];
-
     updateFilter(key, newArray);
   };
 
   const hasActiveFilters =
-    filters.userType !== 'all' ||
-    filters.ageRange[0] !== 16 || filters.ageRange[1] !== 35 ||
-    filters.experience.length > 0 ||
-    filters.position.length > 0 ||
-    filters.location.length > 0 ||
-    filters.status !== 'all';
+    safeFilters.userType !== "all" ||
+    safeFilters.status !== "all" ||
+    safeFilters.age.length > 0 ||
+    safeFilters.distance !== 0 ||
+    safeFilters.experience.length > 0 ||
+    safeFilters.position.length > 0 ||
+    safeFilters.zipOrCityState !== "";
 
   return (
     <Card className="w-full max-w-sm shadow-card border-border/50">
@@ -91,15 +106,15 @@ export const FilterSidebar = ({ filters, onFiltersChange, onClearFilters }: Filt
         <div className="space-y-3">
           <Label className="text-sm font-medium">User Type</Label>
           <div className="flex flex-wrap gap-2">
-            {['all', 'players', 'teams'].map((type) => (
+            {["all", "players", "teams"].map((type) => (
               <Badge
                 key={type}
-                variant={filters.userType === type ? 'default' : 'outline'}
-                className={`cursor-pointer transition-all ${filters.userType === type
-                  ? 'bg-primary text-primary-foreground'
-                  : 'hover:bg-secondary'
+                variant={safeFilters.userType === type ? "default" : "outline"}
+                className={`cursor-pointer transition-all ${safeFilters.userType === type
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-secondary"
                   }`}
-                onClick={() => updateFilter('userType', type)}
+                onClick={() => updateFilter("userType", type)}
               >
                 {type.charAt(0).toUpperCase() + type.slice(1)}
               </Badge>
@@ -109,53 +124,19 @@ export const FilterSidebar = ({ filters, onFiltersChange, onClearFilters }: Filt
 
         <Separator />
 
-        {/* Age Range */}
+        {/* Listing Type */}
         <div className="space-y-3">
-          <Label className="text-sm font-medium">
-            Age Range: {filters.ageRange[0]} - {filters.ageRange[1]}
-          </Label>
-          <Slider
-            value={filters.ageRange}
-            onValueChange={(value) => updateFilter('ageRange', value)}
-            min={16}
-            max={35}
-            step={1}
-            className="w-full"
-          />
-        </div>
-
-        <Separator />
-
-        {/* ✅ Distance Filter */}
-        <div className="space-y-3">
-          <Label className="text-sm font-medium">
-            Distance: {filters.distance[0]} km - {filters.distance[1]} km
-          </Label>
-          <Slider
-            value={filters.distance}
-            onValueChange={(value) => updateFilter('distance', value)}
-            min={0}
-            max={100}
-            step={5}
-            className="w-full"
-          />
-        </div>
-
-        <Separator />
-
-        {/* Status */}
-        <div className="space-y-3">
-          <Label className="text-sm font-medium">Listing Status</Label>
+          <Label className="text-sm font-medium">Listing Type</Label>
           <div className="flex flex-wrap gap-2">
-            {['all', 'available', 'filled'].map((status) => (
+            {["all", "available", "filled"].map((status) => (
               <Badge
                 key={status}
-                variant={filters.status === status ? 'default' : 'outline'}
-                className={`cursor-pointer transition-all ${filters.status === status
-                  ? 'bg-primary text-primary-foreground'
-                  : 'hover:bg-secondary'
+                variant={safeFilters.status === status ? "default" : "outline"}
+                className={`cursor-pointer transition-all ${safeFilters.status === status
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-secondary"
                   }`}
-                onClick={() => updateFilter('status', status)}
+                onClick={() => updateFilter("status", status)}
               >
                 {status.charAt(0).toUpperCase() + status.slice(1)}
               </Badge>
@@ -165,19 +146,75 @@ export const FilterSidebar = ({ filters, onFiltersChange, onClearFilters }: Filt
 
         <Separator />
 
-        {/* Experience Level */}
+        {/* Age */}
         <div className="space-y-3">
-          <Label className="text-sm font-medium">Experience Level</Label>
+          <Label className="text-sm font-medium">Age</Label>
+          <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto">
+            {ages.map((age) => (
+              <Badge
+                key={age}
+                variant={safeFilters.age.includes(age) ? "default" : "outline"}
+                className={`cursor-pointer text-xs transition-all ${safeFilters.age.includes(age)
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-secondary"
+                  }`}
+                onClick={() => toggleArrayFilter("age", age)}
+              >
+                {age}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Zip/City & State */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">Zip / City & State</Label>
+          <Input
+            placeholder="Enter zip or city, state"
+            value={safeFilters.zipOrCityState}
+            onChange={(e) => updateFilter("zipOrCityState", e.target.value)}
+          />
+        </div>
+
+        {/* Distance */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">
+            Distance: 0 - {safeFilters.distance} miles
+          </Label>
+          <Slider
+            value={[safeFilters.distance]}
+            onValueChange={(value) => updateFilter("distance", value[0])}
+            min={0}
+            max={100}
+            step={1} // must be a number, no marks in shadcn slider
+            className="w-full"
+          />
+          <div className="flex justify-between text-xs text-muted-foreground">
+            {distanceMarks.map((mark) => (
+              <span key={mark}>{mark}mi</span>
+            ))}
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Experience */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">Experience</Label>
           <div className="flex flex-wrap gap-1">
             {experienceLevels.map((level) => (
               <Badge
                 key={level}
-                variant={filters.experience.includes(level) ? 'default' : 'outline'}
-                className={`cursor-pointer text-xs transition-all ${filters.experience.includes(level)
-                  ? 'bg-primary text-primary-foreground'
-                  : 'hover:bg-secondary'
+                variant={
+                  safeFilters.experience.includes(level) ? "default" : "outline"
+                }
+                className={`cursor-pointer text-xs transition-all ${safeFilters.experience.includes(level)
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-secondary"
                   }`}
-                onClick={() => toggleArrayFilter('experience', level)}
+                onClick={() => toggleArrayFilter("experience", level)}
               >
                 {level}
               </Badge>
@@ -194,36 +231,16 @@ export const FilterSidebar = ({ filters, onFiltersChange, onClearFilters }: Filt
             {positions.map((position) => (
               <Badge
                 key={position}
-                variant={filters.position.includes(position) ? 'default' : 'outline'}
-                className={`cursor-pointer text-xs transition-all ${filters.position.includes(position)
-                  ? 'bg-primary text-primary-foreground'
-                  : 'hover:bg-secondary'
+                variant={
+                  safeFilters.position.includes(position) ? "default" : "outline"
+                }
+                className={`cursor-pointer text-xs transition-all ${safeFilters.position.includes(position)
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-secondary"
                   }`}
-                onClick={() => toggleArrayFilter('position', position)}
+                onClick={() => toggleArrayFilter("position", position)}
               >
                 {position}
-              </Badge>
-            ))}
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Location */}
-        <div className="space-y-3">
-          <Label className="text-sm font-medium">Location</Label>
-          <div className="flex flex-wrap gap-1">
-            {locations.map((location) => (
-              <Badge
-                key={location}
-                variant={filters.location.includes(location) ? 'default' : 'outline'}
-                className={`cursor-pointer text-xs transition-all ${filters.location.includes(location)
-                  ? 'bg-primary text-primary-foreground'
-                  : 'hover:bg-secondary'
-                  }`}
-                onClick={() => toggleArrayFilter('location', location)}
-              >
-                {location}
               </Badge>
             ))}
           </div>
