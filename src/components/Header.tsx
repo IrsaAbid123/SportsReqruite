@@ -37,7 +37,7 @@ export const Header = ({ currentUser, onSearch, onLogout }: HeaderProps) => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-card">
+    <header className="sticky top-0 z-50 w-full border-b bg-white ">
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <div className="flex items-center space-x-4">

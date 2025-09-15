@@ -26,6 +26,10 @@ const Index = () => {
     status: 'all'
   });
 
+  // Check if user is authenticated based on token
+  const hasToken = localStorage.getItem('authToken');
+  const isUserAuthenticated = Boolean(hasToken);
+
   const handleLogout = () => {
     setIsAuthenticated(false);
   };
@@ -78,9 +82,11 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header
-        currentUser={currentUser}
-        onSearch={handleSearch}
-        onLogout={handleLogout}
+        {...(isUserAuthenticated && {
+          currentUser: currentUser,
+          onSearch: handleSearch,
+          onLogout: handleLogout
+        })}
       />
 
       {/* Hero Section */}
@@ -165,7 +171,7 @@ const Index = () => {
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Filters Sidebar */}
             <aside className="lg:w-80">
-              <div className="sticky top-24">
+              <div className=" top-24">
                 <FilterSidebar
                   filters={filters}
                   onFiltersChange={setFilters}
