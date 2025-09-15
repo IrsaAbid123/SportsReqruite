@@ -119,8 +119,11 @@ export const Header = ({ currentUser, onSearch, onLogout }: HeaderProps) => {
             </>
           ) : (
             <div className="flex items-center space-x-2">
-              <Button variant="ghost">Sign In</Button>
-              <Button className="bg-gradient-redwhiteblued hover:opacity-90 transition-opacity">
+              <Button variant="ghost" onClick={() => navigate('/signin')}>Sign In</Button>
+              <Button
+                className="bg-gradient-redwhiteblued hover:opacity-90 transition-opacity"
+                onClick={() => navigate('/signin')}
+              >
                 Join Now
               </Button>
             </div>
