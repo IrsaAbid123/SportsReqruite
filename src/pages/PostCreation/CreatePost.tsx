@@ -5,6 +5,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Card } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function CreatePost() {
   const [formData, setFormData] = useState({
@@ -18,6 +25,22 @@ export default function CreatePost() {
       position: "",
     },
   });
+
+
+  const ageRangeOptions = [
+    "6u", "7u", "8u", "9u", "10u", "11u", "12u", "13u", "14u",
+    "15u", "16u", "17u", "18u", "College",
+  ];
+
+  const experienceLevelOptions = [
+    "A", "AA", "AAA", "Majors", "NAIA", "D3", "D2", "D1", "JuCo",
+  ];
+
+  const positionOptions = [
+    "Catcher", "Left Pitcher", "Right Pitcher", "First Base", "Second Base",
+    "Short Stop", "Third Base", "Left Outfield", "Center Outfield",
+    "Right Outfield", "DH",
+  ];
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -125,35 +148,79 @@ export default function CreatePost() {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Requirements</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Age */}
                 <div className="space-y-2">
                   <Label htmlFor="age">Age Range</Label>
-                  <Input
-                    id="age"
-                    type="text"
-                    placeholder="18-22"
+                  <Select
+                    onValueChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        requirements: { ...formData.requirements, age: value },
+                      })
+                    }
                     value={formData.requirements.age}
-                    onChange={handleChange}
-                  />
+                  >
+                    <SelectTrigger id="age">
+                      <SelectValue placeholder="Select age range" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ageRangeOptions.map((age) => (
+                        <SelectItem key={age} value={age}>
+                          {age}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
+
+                {/* Experience */}
                 <div className="space-y-2">
                   <Label htmlFor="experience">Experience</Label>
-                  <Input
-                    id="experience"
-                    type="text"
-                    placeholder="High School+"
+                  <Select
+                    onValueChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        requirements: { ...formData.requirements, experience: value },
+                      })
+                    }
                     value={formData.requirements.experience}
-                    onChange={handleChange}
-                  />
+                  >
+                    <SelectTrigger id="experience">
+                      <SelectValue placeholder="Select experience" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {experienceLevelOptions.map((exp) => (
+                        <SelectItem key={exp} value={exp}>
+                          {exp}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
+
+                {/* Position */}
                 <div className="space-y-2">
                   <Label htmlFor="position">Position</Label>
-                  <Input
-                    id="position"
-                    type="text"
-                    placeholder="Pitcher"
+                  <Select
+                    onValueChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        requirements: { ...formData.requirements, position: value },
+                      })
+                    }
                     value={formData.requirements.position}
-                    onChange={handleChange}
-                  />
+                  >
+                    <SelectTrigger id="position">
+                      <SelectValue placeholder="Select position" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {positionOptions.map((pos) => (
+                        <SelectItem key={pos} value={pos}>
+                          {pos}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>

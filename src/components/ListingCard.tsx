@@ -2,7 +2,9 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Calendar, MapPin, Clock, Star, Users } from "lucide-react";
+import { ShareCard } from "@/pages/PostCreation/ShareCard";
+import { Calendar, MapPin, Clock, Star, Users, Share2 } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export interface Listing {
@@ -35,6 +37,8 @@ interface ListingCardProps {
 
 export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) => {
   const navigate = useNavigate()
+  const [shareOpen, setShareOpen] = useState(false);
+  const shareUrl = `${window.location.origin}/listing/${listing.id}`;
   const isExpired = new Date(listing.expiryDate) < new Date();
   const timeAgo = new Date(listing.createdAt).toLocaleDateString();
 
@@ -148,7 +152,7 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center justify-between pt-2 space-x-2">
             <Button
               variant="ghost"
               size="sm"
@@ -157,20 +161,32 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
             >
               Save
             </Button>
-            <Button
-              size="sm"
-              onClick={() =>
-                navigate('/chat')
-              }
-              // disabled={listing.status === 'filled' || isExpired}
-              className={listing.status === 'available' && !isExpired
-                ? 'bg-gradient-redwhiteblued hover:opacity-90 transition-opacity'
-                : ''
-              }
-            >
-              {listing.author.role === 'player' ? 'Contact Player' : 'Contact Team'}
-            </Button>
+
+            <div className="flex space-x-2">
+              <Button
+                size="sm"
+                onClick={() => setShareOpen(true)}
+                variant="outline"
+                className="flex items-center gap-1"
+              >
+                <Share2 className="h-4 w-4" />
+                Share
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => navigate("/chat")}
+                className={
+                  listing.status === "available" && !isExpired
+                    ? "bg-gradient-redwhiteblued hover:opacity-90 transition-opacity"
+                    : ""
+                }
+              >
+                {listing.author.role === "player" ? "Contact Player" : "Contact Team"}
+              </Button>
+            </div>
           </div>
+
+          <ShareCard open={shareOpen} onOpenChange={setShareOpen} url={shareUrl} />
         </div>
       </CardContent>
     </Card>

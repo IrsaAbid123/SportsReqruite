@@ -28,7 +28,7 @@ const ages = [
   "16u", "17u", "18u", "College",
 ];
 
-const experienceLevels = ["A", "AA", "AAA", "Majors", "NAIA", "D3", "D2", "D1"];
+const experienceLevels = ["A", "AA", "AAA", "Majors", "NAIA", "D3", "D2", "D1", "JuCo"];
 
 const positions = [
   "Catcher", "Left Pitcher", "Right Pitcher", "First Base", "Second Base",

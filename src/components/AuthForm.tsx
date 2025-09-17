@@ -56,7 +56,7 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
     "College",
   ]
 
-  const experienceLevelOptions = ["A", "AA", "AAA", "Majors", "NAIA", "D3", "D2", "D1"];
+  const experienceLevelOptions = ["A", "AA", "AAA", "Majors", "NAIA", "D3", "D2", "D1", "JuCo"];
 
   const positionOptions = [
     "Catcher", "Left Pitcher", "Right Pitcher", "First Base", "Second Base",
