@@ -12,8 +12,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useCreatePostMutation } from "@/redux/ApiCalls/postApi";
+import { useUser } from "@/context/UserContext";
+import { useNavigate } from "react-router-dom";
 
 export default function CreatePost() {
+  const navigate = useNavigate()
+  const { user } = useUser();
+  const [createPost] = useCreatePostMutation();
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -56,27 +62,40 @@ export default function CreatePost() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Construct final post object
     const newPost = {
       ...formData,
       tags: formData.tags.split(",").map((tag) => tag.trim()),
-      author: {
-        name: "Coach Martinez",
-        role: "team",
-        avatar: "/placeholder.svg",
-        experience: "15+ years coaching",
-        location: "Austin, TX",
-      },
+      author: user?._id, // replace with actual logged-in user ID
       status: "available",
-      createdAt: new Date().toISOString().split("T")[0],
+      createdAt: new Date().toISOString(),
+      requirements: {
+        fromAge: formData.requirements.age,
+        experience: formData.requirements.experience,
+        position: formData.requirements.position,
+      },
     };
 
-    console.log("📌 New Post:", newPost);
-    alert("Post Created! (check console)");
+    try {
+      await createPost(newPost).unwrap();
+      navigate("/")
+      setFormData({
+        title: "",
+        description: "",
+        expiryDate: "",
+        tags: "",
+        requirements: { age: "", experience: "", position: "" },
+      });
+    } catch (err) {
+      console.error(err);
+      navigate("/")
+      alert("Failed to create post!");
+    }
   };
+
 
   return (
     <div className="min-h-screen grid grid-cols-1 md:grid-cols-2">

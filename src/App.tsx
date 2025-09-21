@@ -16,39 +16,16 @@ import { useEffect, useState } from "react";
 import { AuthForm } from "./components/AuthForm";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { ChatPage } from "./pages/Chat/ChatPage";
+import { useUser } from "./context/UserContext";
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  // Initialize auth state from localStorage and clear token on window close
-  useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    setIsAuthenticated(!!token);
-
-    const handleBeforeUnload = () => {
-      localStorage.removeItem("authToken");
-    };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, []);
-
-  const handleLogin = (_credentials: { email: string; password: string }) => {
-    // In production, set the real token from API response
-    localStorage.setItem("authToken", "mock-token");
-    setIsAuthenticated(true);
-  };
-
-  const handleRegister = (_userData: { name: string; email: string; password: string; role: string }) => {
-    // In production, set the real token from API response
-    localStorage.setItem("authToken", "mock-token");
-    setIsAuthenticated(true);
-  };
+  const { user, setUser } = useUser();
+  const isAuthenticated = !!user;
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    setIsAuthenticated(false);
+    setUser(null);
   };
 
   return (
@@ -65,7 +42,7 @@ const App = () => {
                 isAuthenticated ? (
                   <Navigate to="/" replace />
                 ) : (
-                  <AuthForm onLogin={handleLogin} onRegister={handleRegister} />
+                  <AuthForm />
                 )
               }
             />

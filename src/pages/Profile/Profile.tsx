@@ -1,4 +1,3 @@
-
 import { useState } from "react"
 import { ListingCard } from "@/components/ListingCard"
 import { Button } from "@/components/ui/button"
@@ -7,7 +6,6 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { FaLocationDot } from "react-icons/fa6";
 import { FaFacebook, FaLinkedin, FaTwitter } from "react-icons/fa";
-import { mockUser } from "@/data/mockData"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -17,48 +15,21 @@ import {
 import { MdEdit } from "react-icons/md";
 import { HiDotsVertical } from "react-icons/hi"
 import { Trophy } from "lucide-react"
-import { mockListings } from "@/data/mockData"
-import { FilterOptions } from "@/components/FilterSidebar";
+import { useUser } from "@/context/UserContext"
+import { useGetProfileQuery } from "@/redux/ApiCalls/userApi"
 
 export default function ProfilePage() {
-    const [activeTab, setActiveTab] = useState("posts")
-    const [listings, setListings] = useState(mockListings);
-    const [filters, setFilters] = useState<FilterOptions>({
-        userType: 'all',
-        ageRange: [16, 35],
-        distance: [10, 100],
-        experience: [],
-        position: [],
-        location: [],
-        status: 'all'
-    });
+    const { user } = useUser()
+    const { data, isLoading, error } = useGetProfileQuery(user?._id)
 
-    const handleContact = (listingId: string) => {
-        console.log("Contact listing:", listingId);
-    };
+    if (isLoading) return <div>Loading...</div>
+    if (error) return <div>Error loading profile</div>
 
-    const handleSave = (listingId: string) => {
-        console.log("Save listing:", listingId);
-    };
+    const profileUser = data?.user
+    const listings = data?.post || []
 
-    const filteredListings = listings.filter(listing => {
-        if (filters.userType !== 'all' &&
-            ((filters.userType === 'players' && listing.author.role !== 'player') ||
-                (filters.userType === 'teams' && listing.author.role !== 'team'))) {
-            return false;
-        }
-
-        if (filters.status !== 'all' && listing.status !== filters.status) {
-            return false;
-        }
-
-        if (filters.experience.length > 0 &&
-            !filters.experience.some(exp => listing.tags.includes(exp))) {
-            return false;
-        }
-
-        return true;
-    });
+    // Check if this is the current user's own profile
+    const isOwnProfile = user?._id === profileUser?._id
 
     return (
         <div className="min-h-screen bg-background">
@@ -78,10 +49,10 @@ export default function ProfilePage() {
                 {/* Avatar  */}
                 <div>
                     <Avatar className="w-44 -mt-28 h-44 mb-4 border-4 border-white shadow-lg">
-                        <AvatarImage src={mockUser.avatar || "/placeholder.svg"} alt={mockUser.name} />
+                        <AvatarImage src={"/placeholder.svg"} alt={profileUser?.fullname} />
                         <AvatarFallback className="text-2xl font-bold bg-primary text-primary-foreground">
-                            {mockUser.name
-                                .split(" ")
+                            {profileUser?.fullname
+                                ?.split(" ")
                                 .map((n) => n[0])
                                 .join("")}
                         </AvatarFallback>
@@ -90,105 +61,139 @@ export default function ProfilePage() {
 
                 {/* User Info section */}
                 <div className="flex flex-row w-full">
-                    {/* NAme and socials  */}
+                    {/* Name and socials */}
                     <div className="flex-1">
-                        <p className="text-xl font-bold">{mockUser?.name}</p>
+                        <div className="flex items-center gap-3 mb-2">
+                            <p className="text-xl font-bold">{profileUser?.fullname}</p>
+                            {profileUser?.verified && (
+                                <Badge variant="default" className="bg-green-500">
+                                    Verified
+                                </Badge>
+                            )}
+                        </div>
+
+                        {/* Role and Position */}
+                        <div className="flex items-center gap-4 mb-2">
+                            <Badge variant="outline" className="capitalize">
+                                {profileUser?.role}
+                            </Badge>
+                            {profileUser?.position && (
+                                <Badge variant="secondary" className="capitalize">
+                                    {profileUser.position}
+                                </Badge>
+                            )}
+                        </div>
+
+                        {/* Age and Experience */}
+                        <div className="flex items-center gap-4 mb-3">
+                            {profileUser?.age && (
+                                <span className="text-sm text-gray-600">
+                                    Age: <span className="font-medium">{profileUser.age}</span>
+                                </span>
+                            )}
+                            {profileUser?.experienceLevel && (
+                                <span className="text-sm text-gray-600">
+                                    Experience: <span className="font-medium">{profileUser.experienceLevel}</span>
+                                </span>
+                            )}
+                        </div>
+
                         <span className="text-md ">Coatches don't play and advusors alwats a good advusor as always </span>
+
+                        {/* Social Links */}
                         <div className="flex flex-row gap-5 py-5">
                             <span className="text-gray-400 flex flex-row items-center text-sm gap-1">
                                 <FaLocationDot />
-                                <p>{mockUser?.location}</p>
+                                <p>{profileUser?.location}</p>
                             </span>
-                            <span className="text-gray-400 flex flex-row items-center text-sm gap-1">
-                                <FaFacebook />
-                                <p>{mockUser?.location}</p>
+
+                        </div>
+
+                        {/* Followers/Following Stats */}
+                        <div className="flex items-center gap-6 text-sm">
+                            <span className="text-gray-600">
+                                <span className="font-semibold">{profileUser?.followers?.length || 0}</span> Followers
                             </span>
-                            <span className="text-gray-400 flex flex-row items-center text-sm gap-1">
-                                <FaLinkedin />
-                                <p>{mockUser?.location}</p>
+                            <span className="text-gray-600">
+                                <span className="font-semibold">{profileUser?.following?.length || 0}</span> Following
                             </span>
-                            <span className="text-gray-400 flex flex-row items-center text-sm gap-1">
-                                <FaTwitter />
-                                <p>{mockUser?.location}</p>
+                            <span className="text-gray-600">
+                                Member since <span className="font-medium">
+                                    {profileUser?.createdAt ? new Date(profileUser.createdAt).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'short'
+                                    }) : ''}
+                                </span>
                             </span>
                         </div>
                     </div>
 
-                    {/* Dropdown to edit your profile  */}
-                    <div className="">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-10 w-10 p-2">
-                                    <HiDotsVertical className="h-5 w-5" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-40" align="end" forceMount>
-                                <DropdownMenuItem className="cursor-pointer">
-                                    <MdEdit className="mr-2 h-4 w-4" />
-                                    Edit Profile
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-
-
+                    {/* Dropdown to edit your profile - only show for own profile */}
+                    {isOwnProfile && (
+                        <div className="">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-10 w-10 p-2">
+                                        <HiDotsVertical className="h-5 w-5" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-40" align="end" forceMount>
+                                    <DropdownMenuItem className="cursor-pointer">
+                                        <MdEdit className="mr-2 h-4 w-4" />
+                                        Edit Profile
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    )}
                 </div>
             </section>
 
             {/* Profile Content */}
             <div className="container flex flex-row px-32 py-10 gap-10">
                 <div className=" p-6 ">
-
                     <div className="space-y-3 mb-5">
-                        <div className="flex items-center text-sm">
-                            <svg className="w-4 h-4 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
-                            </svg>
-                            <span className="text-gray-800 font-medium">+7911 0018630</span>
-                            <span className="text-gray-400 text-xs ml-1">(Office)</span>
-                        </div>
-
-                        <div className="flex items-center text-sm">
-                            <svg className="w-4 h-4 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
-                            </svg>
-                            <span className="text-gray-800 font-medium">+7496 7141177</span>
-                            <span className="text-gray-400 text-xs ml-1">(Mobile)</span>
-                        </div>
 
                         <div className="flex items-center text-sm">
                             <svg className="w-4 h-4 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
                             </svg>
-                            <a href="mailto:kevin.smith@stripe.com" className="text-gray-400 hover:underline">kevin.smith@stripe.com</a>
+                            <a href={`mailto:${profileUser?.email}`} className="text-gray-400 hover:underline">
+                                {profileUser?.email}
+                            </a>
                         </div>
                     </div>
 
-
-                    <button className="w-full bg-gradient-redwhiteblued text-white font-semibold py-3 px-6 rounded-full flex items-center justify-center mb-5 transition-colors">
-                        <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
-                        </svg>
-                        Connect
-                    </button>
-
+                    {isOwnProfile ? (
+                        <button className="w-full bg-gradient-redwhiteblued text-white font-semibold py-3 px-6 rounded-full flex items-center justify-center mb-5 transition-colors">
+                            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                            </svg>
+                            Saved Posts
+                        </button>
+                    ) : (
+                        <button className="w-full bg-gradient-redwhiteblued text-white font-semibold py-3 px-6 rounded-full flex items-center justify-center mb-5 transition-colors">
+                            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
+                            </svg>
+                            Connect
+                        </button>
+                    )}
                 </div>
-                <div className="space-y-6">
+
+                <div className="space-y-6 flex-1">
                     <div className="text-4xl font-bold bg-gradient-redwhiteblued bg-clip-text text-transparent">
-                        My Posts
+                        {isOwnProfile ? "My Posts" : `${profileUser?.fullname}'s Posts`}
                     </div>
-                    {filteredListings.length > 0 ? (
-                        filteredListings.map((listing) => {
-                            console.log("listing", listing)
-                            return (
-                                <ListingCard
-                                    key={listing.id}
-                                    listing={listing}
-                                    onContact={handleContact}
-                                    onSave={handleSave}
-                                />
-                            )
-                        })
+                    {listings.length > 0 ? (
+                        listings.map((listing: any) => (
+                            <ListingCard
+                                key={listing._id}
+                                listing={listing}
+                                onContact={() => console.log("Contact:", listing._id)}
+                                onSave={() => console.log("Save:", listing._id)}
+                            />
+                        ))
                     ) : (
                         <Card className="p-8 text-center">
                             <CardContent>

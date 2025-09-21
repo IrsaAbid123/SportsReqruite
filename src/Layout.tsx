@@ -19,10 +19,7 @@ export const MainLayout = ({ onLogout }: { onLogout?: () => void }) => {
     return (
         <div className="flex flex-col min-h-screen">
             {/* Header on top */}
-            <Header
-                currentUser={currentUser}
-                onSearch={handleSearch}
-                onLogout={handleLogout} />
+            <Header />
 
             {/* Page content */}
             <main className="flex-1">

@@ -12,12 +12,15 @@ import { GoogleMap, useJsApiLoader, StandaloneSearchBox } from '@react-google-ma
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useLoginUserMutation, useRegisterUserMutation } from "@/redux/ApiCalls/authApi";
+import { useUser } from "@/context/UserContext";
 interface AuthFormProps {
   onLogin?: (credentials: { email: string; password: string }) => void;
   onRegister?: (userData: { name: string; email: string; password: string; role: string }) => void;
 }
 
 export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
+  const { setUser } = useUser();
   const navigate = useNavigate();
   const mapRef = useRef(null);
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
@@ -31,8 +34,12 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
     location: "",
     ageRanges: [] as string[],
     experienceLevels: [] as string[],
-    positions: [] as string[],
+    positions: "",
   });
+
+  // ✅ RTK mutation hook
+  const [registerUser, { isLoading, error }] = useRegisterUserMutation();
+  const [loginUser] = useLoginUserMutation();
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAP_API_KEY || '',
@@ -62,36 +69,52 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
     "Catcher", "Left Pitcher", "Right Pitcher", "First Base", "Second Base",
     "Short Stop", "Third Base", "Left Outfield", "Center Outfield",
     "Right Outfield", "DH",
-  ];
+  ]
 
-  const handleMultiSelect = (
-    value: string,
-    currentArray: string[],
-    field: "ageRanges" | "experienceLevels" | "positions",
-  ) => {
-    const newArray = currentArray.includes(value)
-      ? currentArray.filter((item) => item !== value)
-      : [...currentArray, value]
-
-    setRegisterData({ ...registerData, [field]: newArray })
-  }
-
-
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin?.(loginData);
-    navigate("/");
+    try {
+      const payload = { email: loginData.email, password: loginData.password };
+      const response = await loginUser(payload).unwrap();
+
+      localStorage.setItem("user", JSON.stringify(response.user));
+      setUser(response.user);
+
+      navigate("/");
+    } catch (err) {
+      console.error("❌ Login Failed:", err);
+    }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (registerData.password !== registerData.confirmPassword) {
       alert("Passwords don't match!");
       return;
     }
-    onRegister?.(registerData);
-    navigate("/");
+
+    try {
+      const payload = {
+        fullname: registerData.name,
+        email: registerData.email,
+        password: registerData.password,
+        role: registerData.role,
+        location: registerData.location,
+        age: registerData.ageRanges[0] || "",
+        experienceLevel: registerData.experienceLevels[0] || "",
+        position: registerData.positions,
+      };
+      const response = await registerUser(payload).unwrap();
+
+      localStorage.setItem("user", JSON.stringify(response.user));
+      setUser(response.user);
+
+      navigate("/");
+    } catch (err) {
+      console.error("❌ Register Failed:", err);
+    }
   };
+
 
   const handlePlacesChanged = () => {
     const places = mapRef.current?.getPlaces();
@@ -300,9 +323,9 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
                       <div className="space-y-3">
                         <Label htmlFor="positions">Position</Label>
                         <Select
-                          value={registerData.positions[0] || ""}
+                          value={registerData.positions}
                           onValueChange={(val) =>
-                            setRegisterData({ ...registerData, positions: [val] })
+                            setRegisterData({ ...registerData, positions: val })
                           }
                         >
                           <SelectTrigger>

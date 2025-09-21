@@ -8,22 +8,24 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export interface Listing {
-  id: string;
+  _id: string;
   title: string;
   description: string;
   author: {
-    name: string;
+    _id: string;
+    fullname: string;
     role: 'player' | 'team';
     avatar?: string;
-    experience: string;
+    experienceLevel: string;
     location: string;
-  };
+  } | null;
   status: 'available' | 'filled';
   expiryDate: string;
   createdAt: string;
   tags: string[];
   requirements?: {
-    age?: string;
+    fromAge?: string;
+    toAge?: string;
     experience?: string;
     position?: string;
   };
@@ -38,9 +40,15 @@ interface ListingCardProps {
 export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) => {
   const navigate = useNavigate()
   const [shareOpen, setShareOpen] = useState(false);
-  const shareUrl = `${window.location.origin}/listing/${listing.id}`;
+  const shareUrl = `${window.location.origin}/listing/${listing._id}`;
   const isExpired = new Date(listing.expiryDate) < new Date();
   const timeAgo = new Date(listing.createdAt).toLocaleDateString();
+
+  // Handle null author case
+  const authorName = listing.author?.fullname || 'Unknown User';
+  const authorRole = listing.author?.role || 'player';
+  const authorExperience = listing.author?.experienceLevel || 'Unknown';
+  const authorLocation = listing.author?.location || 'Unknown Location';
 
   return (
     <Card className="w-full  shadow-card hover:shadow-elevated transition-all duration-300 border-border/50">
@@ -48,29 +56,29 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
         <div className="flex items-start justify-between">
           <div className="flex items-start space-x-3">
             <Avatar className="h-12 w-12">
-              <AvatarImage src={listing.author.avatar} alt={listing.author.name} />
+              <AvatarImage src={listing.author?.avatar} alt={authorName} />
               <AvatarFallback className="bg-gradient-accent text-accent-foreground font-semibold">
-                {listing.author.name.charAt(0).toUpperCase()}
+                {authorName.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
               <div className="flex items-center space-x-2">
-                <h3 className="font-semibold text-foreground">{listing.author.name}</h3>
+                <h3 className="font-semibold text-foreground">{authorName}</h3>
                 <Badge
-                  variant={listing.author.role === 'player' ? 'secondary' : 'outline'}
+                  variant={authorRole === 'player' ? 'secondary' : 'outline'}
                   className="text-xs"
                 >
-                  {listing.author.role === 'player' ? 'Player' : 'Team/Coach'}
+                  {authorRole === 'player' ? 'Player' : 'Team/Coach'}
                 </Badge>
               </div>
               <div className="flex items-center space-x-4 text-xs text-black mt-1">
                 <span className="flex items-center">
                   <Star className="h-3 w-3 mr-1" />
-                  {listing.author.experience}
+                  {authorExperience}
                 </span>
                 <span className="flex items-center">
                   <MapPin className="h-3 w-3 mr-1" />
-                  {listing.author.location}
+                  {authorLocation}
                 </span>
               </div>
             </div>
@@ -119,10 +127,10 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
             <div className="bg-secondary/30 rounded-lg p-3 space-y-1">
               <h5 className="text-sm font-medium text-foreground">Requirements:</h5>
               <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-                {listing.requirements.age && (
+                {(listing.requirements.fromAge || listing.requirements.toAge) && (
                   <span className="flex items-center text-black">
                     <Users className="h-3 w-3 mr-1" />
-                    Age: {listing.requirements.age}
+                    Age: {listing.requirements.fromAge}{listing.requirements.toAge ? ` - ${listing.requirements.toAge}` : '+'}
                   </span>
                 )}
                 {listing.requirements.experience && (
@@ -156,7 +164,7 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onSave?.(listing.id)}
+              onClick={() => onSave?.(listing._id)}
               className="text-black hover:text-foreground"
             >
               Save
@@ -181,7 +189,7 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
                     : ""
                 }
               >
-                {listing.author.role === "player" ? "Contact Player" : "Contact Team"}
+                {authorRole === "player" ? "Contact Player" : "Contact Team"}
               </Button>
             </div>
           </div>

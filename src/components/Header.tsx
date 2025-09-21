@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,39 +16,43 @@ import { useNavigate } from "react-router-dom";
 import { SheetTrigger, Sheet } from "./ui/sheet";
 import { NotificationSheet } from "@/pages/Notification/NotificationsPage";
 import { mockNotifications } from "@/data/mockData";
+import { useUser } from "@/context/UserContext";
 
-interface HeaderProps {
-  currentUser?: {
-    name: string;
-    role: 'player' | 'team' | 'admin';
-    avatar?: string;
-  };
-  onSearch?: (query: string) => void;
-  onLogout?: () => void;
-}
+export const Header = () => {
+  const { user, setUser } = useUser();
+  const navigate = useNavigate();
 
-export const Header = ({ currentUser, onSearch, onLogout }: HeaderProps) => {
-  const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState("");
-  const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+
+  const isAuthenticated = !!user;
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    setUser(null);
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch?.(searchQuery);
+    console.log("Searching:", searchQuery);
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white ">
+    <header className="sticky top-0 z-50 w-full border-b bg-white">
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
-        <div className="flex items-center space-x-4">
-          <div className="text-2xl font-bold cursor-pointer bg-gradient-redwhiteblued bg-clip-text text-transparent" onClick={() => navigate('/')}>
-            SportRecruit
-          </div>
+        <div
+          className="text-2xl font-bold cursor-pointer bg-gradient-redwhiteblued bg-clip-text text-transparent"
+          onClick={() => navigate("/")}
+        >
+          SportRecruit
         </div>
 
         {/* Search Bar */}
-        <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-8">
+        <form
+          onSubmit={handleSearch}
+          className="hidden md:flex flex-1 max-w-md mx-8"
+        >
           <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -60,9 +65,9 @@ export const Header = ({ currentUser, onSearch, onLogout }: HeaderProps) => {
           </div>
         </form>
 
-        {/* Right Side Actions */}
+        {/* Right Side */}
         <div className="flex items-center space-x-3">
-          {currentUser ? (
+          {isAuthenticated ? (
             <>
               {/* Notifications */}
               <Sheet open={notificationsOpen} onOpenChange={setNotificationsOpen}>
@@ -77,31 +82,38 @@ export const Header = ({ currentUser, onSearch, onLogout }: HeaderProps) => {
                     </Badge>
                   </Button>
                 </SheetTrigger>
-                {/* Use the new component */}
                 <NotificationSheet notifications={mockNotifications} />
               </Sheet>
 
               {/* User Menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <Button
+                    variant="ghost"
+                    className="relative h-10 w-10 rounded-full"
+                  >
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
+                      <AvatarImage src={user?.avatar} alt={user?.name} />
                       <AvatarFallback className="bg-gradient-accent text-accent-foreground">
-                        {currentUser.name.charAt(0).toUpperCase()}
+                        {user?.fullname?.[0]?.toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <div className="flex flex-col space-y-1 p-2">
-                    <p className="text-sm font-medium leading-none">{currentUser.name}</p>
+                    <p className="text-sm font-medium leading-none">
+                      {user?.name}
+                    </p>
                     <p className="text-xs leading-none text-muted-foreground capitalize">
-                      {currentUser.role}
+                      {user?.role}
                     </p>
                   </div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('my-profile')}>
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => navigate("my-profile")}
+                  >
                     <User className="mr-2 h-4 w-4" />
                     Profile
                   </DropdownMenuItem>
@@ -110,7 +122,10 @@ export const Header = ({ currentUser, onSearch, onLogout }: HeaderProps) => {
                     Settings
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={onLogout} className="cursor-pointer text-destructive">
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="cursor-pointer text-destructive"
+                  >
                     <LogOut className="mr-2 h-4 w-4" />
                     Log out
                   </DropdownMenuItem>
@@ -119,10 +134,12 @@ export const Header = ({ currentUser, onSearch, onLogout }: HeaderProps) => {
             </>
           ) : (
             <div className="flex items-center space-x-2">
-              <Button variant="ghost" onClick={() => navigate('/signin')}>Sign In</Button>
+              <Button variant="ghost" onClick={() => navigate("/signin")}>
+                Sign In
+              </Button>
               <Button
                 className="bg-gradient-redwhiteblued hover:opacity-90 transition-opacity"
-                onClick={() => navigate('/signin')}
+                onClick={() => navigate("/signin")}
               >
                 Join Now
               </Button>

@@ -1,21 +1,24 @@
 import { useState } from "react";
 import { Header } from "@/components/Header";
-import { ListingCard, Listing } from "@/components/ListingCard";
+import { ListingCard } from "@/components/ListingCard";
 import { FilterSidebar, FilterOptions } from "@/components/FilterSidebar";
-import { AuthForm } from "@/components/AuthForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, TrendingUp, Users, Trophy } from "lucide-react";
 import { mockListings, mockUser } from "@/data/mockData";
-import heroImage from "@/assets/hero-sports.jpg";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "@/context/UserContext";
+import { UserRoleEnum } from "@/constants/UserRoleEnums";
+import Dashboard from "./Dashboard/index";
+import { useGetPostsQuery } from "@/redux/ApiCalls/postApi";
 
 const Index = () => {
   const navigate = useNavigate()
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentUser, setCurrentUser] = useState(mockUser);
-  const [listings, setListings] = useState(mockListings);
+  const { user, setUser } = useUser();
+  const isAuthenticated = !!user;
+  const { data: postsData, isLoading, error } = useGetPostsQuery();
+  const listings = postsData?.posts || [];
   const [filters, setFilters] = useState<FilterOptions>({
     userType: 'all',
     age: ["16u", "17u"],
@@ -26,12 +29,9 @@ const Index = () => {
     status: 'all'
   });
 
-  // Check if user is authenticated based on token
-  const hasToken = localStorage.getItem('authToken');
-  const isUserAuthenticated = Boolean(hasToken);
-
   const handleLogout = () => {
-    setIsAuthenticated(false);
+    localStorage.removeItem("user");
+    setUser(null);
   };
 
   const handleSearch = (query: string) => {
@@ -62,8 +62,8 @@ const Index = () => {
   // Filter listings based on current filters
   const filteredListings = listings.filter(listing => {
     if (filters.userType !== 'all' &&
-      ((filters.userType === 'players' && listing.author.role !== 'player') ||
-        (filters.userType === 'teams' && listing.author.role !== 'team'))) {
+      ((filters.userType === 'players' && listing.author?.role !== 'player') ||
+        (filters.userType === 'teams' && listing.author?.role !== 'team'))) {
       return false;
     }
 
@@ -79,15 +79,15 @@ const Index = () => {
     return true;
   });
 
+  if (user?.role === UserRoleEnum.ADMIN) {
+    return (
+      <Dashboard />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      <Header
-        {...(isUserAuthenticated && {
-          currentUser: currentUser,
-          onSearch: handleSearch,
-          onLogout: handleLogout
-        })}
-      />
+      <Header />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-redwhiteblued">
@@ -216,7 +216,7 @@ const Index = () => {
                 {filteredListings.length > 0 ? (
                   filteredListings.map((listing) => (
                     <ListingCard
-                      key={listing.id}
+                      key={listing._id}
                       listing={listing}
                       onContact={handleContact}
                       onSave={handleSave}

@@ -4,14 +4,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
+import { useForgotPasswordMutation } from "@/redux/ApiCalls/authApi";
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState("");
+    const [forgotPassword, { isLoading, error }] = useForgotPasswordMutation();
     const navigate = useNavigate();
-    const handleSubmit = (e: React.FormEvent) => {
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        alert(`OTP sent to ${email}`);
-        navigate("/verify-otp");
+        try {
+            await forgotPassword({ email }).unwrap();
+            navigate("/verify-otp", { state: { email } });
+        } catch (err) {
+            console.error("❌ Forgot password failed:", err);
+        }
     };
 
     return (
@@ -42,10 +49,10 @@ export default function ForgotPassword() {
                         </div>
 
                         <Button
-                            type="submit"
+                            type="submit" disabled={isLoading}
                             className="w-full bg-gradient-redwhiteblued hover:opacity-90 transition-opacity"
                         >
-                            Send OTP
+                            {isLoading ? "Sending..." : "Send OTP"}
                         </Button>
                     </form>
                 </CardContent>
