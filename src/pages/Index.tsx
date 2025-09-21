@@ -106,8 +106,7 @@ const Index = () => {
             size="lg"
             className="bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm"
             onClick={() => {
-              const token = localStorage.getItem('authToken');
-              if (token) {
+              if (isAuthenticated) {
                 navigate('/create-post');
               } else {
                 navigate('/signin');
@@ -200,8 +199,7 @@ const Index = () => {
 
                 <Button className="bg-gradient-redwhiteblued hover:opacity-90 transition-opacity"
                   onClick={() => {
-                    const token = localStorage.getItem('authToken');
-                    if (token) {
+                    if (isAuthenticated) {
                       navigate('/create-post');
                     } else {
                       navigate('/signin');
