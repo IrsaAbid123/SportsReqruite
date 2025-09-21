@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 export const authApi = createApi({
     reducerPath: "authApi",
     baseQuery: fetchBaseQuery({
-        baseUrl: "http://localhost:4000/api/",
+        baseUrl: "https://sports-backend-production-e82f.up.railway.app/api/",
     }),
     endpoints: (builder) => ({
         registerUser: builder.mutation<any, any>({
