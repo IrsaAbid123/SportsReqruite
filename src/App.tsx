@@ -17,6 +17,7 @@ import { AuthForm } from "./components/AuthForm";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { ChatPage } from "./pages/Chat/ChatPage";
 import { useUser } from "./context/UserContext";
+import Dashboard from "./pages/Dashboard/index";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,14 @@ const App = () => {
                 element={
                   <ProtectedRoute isAuthenticated={isAuthenticated}>
                     <CreatePost />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute isAuthenticated={isAuthenticated}>
+                    <Dashboard />
                   </ProtectedRoute>
                 }
               />

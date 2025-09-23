@@ -55,7 +55,7 @@ export function DashboardLayout({ children, activeTab, setActiveTab }: Dashboard
 
     return (
         <div className="flex h-screen bg-background flex-col">
-            <Header />
+            {/* <Header /> */}
             <div className="flex flex-row">
                 {/* Sidebar */}
                 <div

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Search, Bell, User, Settings, LogOut } from "lucide-react";
+import { Search, Bell, User, Settings, LogOut, LayoutDashboard } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -69,6 +69,19 @@ export const Header = () => {
         <div className="flex items-center space-x-3">
           {isAuthenticated ? (
             <>
+              {/* Dashboard Button for Admin */}
+              {user?.role === 'admin' && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('/dashboard')}
+                  className="hidden md:flex items-center gap-2"
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  Dashboard
+                </Button>
+              )}
+
               {/* Notifications */}
               <Sheet open={notificationsOpen} onOpenChange={setNotificationsOpen}>
                 <SheetTrigger asChild>
@@ -110,6 +123,15 @@ export const Header = () => {
                     </p>
                   </div>
                   <DropdownMenuSeparator />
+                  {user?.role === 'admin' && (
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={() => navigate('/admin/dashboard')}
+                    >
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      Dashboard
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => navigate("my-profile")}

@@ -383,7 +383,7 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
                       </div>
                     </div>
 
-                    <div className="flex items-center space-x-3 p-3 rounded-lg border border-border/50 hover:bg-secondary/20 transition-colors">
+                    {/* <div className="flex items-center space-x-3 p-3 rounded-lg border border-border/50 hover:bg-secondary/20 transition-colors">
                       <RadioGroupItem value="admin" id="admin" />
                       <div className="flex items-center space-x-2">
                         <Shield className="h-5 w-5 text-warning" />
@@ -396,7 +396,7 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
                           </p>
                         </div>
                       </div>
-                    </div>
+                    </div> */}
                   </RadioGroup>
                 </div>
 

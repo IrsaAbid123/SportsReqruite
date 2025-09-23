@@ -79,11 +79,11 @@ const Index = () => {
     return true;
   });
 
-  if (user?.role === UserRoleEnum.ADMIN) {
-    return (
-      <Dashboard />
-    );
-  }
+  // if (user?.role === UserRoleEnum.ADMIN) {
+  //   return (
+  //     <Dashboard />
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-background">
