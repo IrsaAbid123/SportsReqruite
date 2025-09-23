@@ -83,6 +83,14 @@ const App = () => {
                 }
               />
               <Route
+                path="/profile/:id"
+                element={
+                  <ProtectedRoute isAuthenticated={isAuthenticated}>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/chat"
                 element={
                   <ProtectedRoute isAuthenticated={isAuthenticated}>

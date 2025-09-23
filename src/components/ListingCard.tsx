@@ -55,7 +55,10 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-start space-x-3">
-            <Avatar className="h-12 w-12">
+            <Avatar
+              className="h-12 w-12 cursor-pointer hover:ring-2 hover:ring-primary/20 transition-all duration-200"
+              onClick={() => navigate(`/profile/${listing.author?._id}`)}
+            >
               <AvatarImage src={listing.author?.avatar} alt={authorName} />
               <AvatarFallback className="bg-gradient-accent text-accent-foreground font-semibold">
                 {authorName.charAt(0).toUpperCase()}

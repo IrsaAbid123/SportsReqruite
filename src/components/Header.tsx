@@ -134,7 +134,7 @@ export const Header = () => {
                   )}
                   <DropdownMenuItem
                     className="cursor-pointer"
-                    onClick={() => navigate("my-profile")}
+                    onClick={() => navigate("/my-profile")}
                   >
                     <User className="mr-2 h-4 w-4" />
                     Profile

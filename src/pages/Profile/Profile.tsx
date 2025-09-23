@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { useParams } from "react-router-dom"
 import { ListingCard } from "@/components/ListingCard"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -21,13 +22,30 @@ import { MdEdit } from "react-icons/md";
 import { HiDotsVertical } from "react-icons/hi"
 import { Trophy } from "lucide-react"
 import { useUser } from "@/context/UserContext"
-import { useGetProfileQuery, useUpdateUserMutation } from "@/redux/ApiCalls/userApi"
+import { useGetProfileQuery, useUpdateUserMutation, useGetUserQuery } from "@/redux/ApiCalls/userApi"
 import { toast } from "sonner"
 import { ageRangeOptions, experienceLevelOptions, positionOptions } from "@/constants/UserDataEnums"
 
 export default function ProfilePage() {
     const { user } = useUser()
-    const { data, isLoading, error } = useGetProfileQuery(user?._id)
+    const { id } = useParams()
+
+    // Determine which user's profile to show
+    const profileUserId = id || user?._id
+
+    // Use different queries based on whether we're viewing own profile or another user's
+    const { data: profileData, isLoading: profileLoading, error: profileError } = useGetProfileQuery(profileUserId!, {
+        skip: !profileUserId
+    })
+
+    const { data: userData, isLoading: userLoading, error: userError } = useGetUserQuery(profileUserId!, {
+        skip: !profileUserId || !id // Only fetch user data when viewing another user's profile
+    })
+
+    // Use profile data if viewing own profile, user data if viewing another user's
+    const data = id ? userData : profileData
+    const isLoading = id ? userLoading : profileLoading
+    const error = id ? userError : profileError
     const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation()
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
     const [formData, setFormData] = useState({
@@ -45,10 +63,10 @@ export default function ProfilePage() {
     if (error) return <div>Error loading profile</div>
 
     const profileUser = data?.user || data
-    const listings = data?.post || []
+    const listings = id ? [] : (data?.post || []) // Only show posts for own profile
 
     // Check if this is the current user's own profile
-    const isOwnProfile = user?._id === profileUser?._id
+    const isOwnProfile = user?._id === profileUserId
 
     // Initialize form data when profile loads
     useEffect(() => {
