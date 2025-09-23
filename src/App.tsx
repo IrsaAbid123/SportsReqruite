@@ -67,14 +67,6 @@ const App = () => {
                 }
               />
               <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute isAuthenticated={isAuthenticated}>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
                 path="/my-profile"
                 element={
                   <ProtectedRoute isAuthenticated={isAuthenticated}>

@@ -59,18 +59,10 @@ export default function ProfilePage() {
         bio: "",
     })
 
-    if (isLoading) return <div>Loading...</div>
-    if (error) return <div>Error loading profile</div>
-
-    const profileUser = data?.user || data
-    const listings = id ? [] : (data?.post || []) // Only show posts for own profile
-
-    // Check if this is the current user's own profile
-    const isOwnProfile = user?._id === profileUserId
-
     // Initialize form data when profile loads
     useEffect(() => {
-        if (profileUser) {
+        if (data?.user || data) {
+            const profileUser = data?.user || data
             setFormData({
                 fullname: profileUser.fullname || "",
                 email: profileUser.email || "",
@@ -82,7 +74,17 @@ export default function ProfilePage() {
                 bio: profileUser.bio || "",
             })
         }
-    }, [profileUser])
+    }, [data])
+
+    // Early returns after all hooks
+    if (isLoading) return <div>Loading...</div>
+    if (error) return <div>Error loading profile</div>
+
+    const profileUser = data?.user || data
+    const listings = id ? [] : (data?.post || []) // Only show posts for own profile
+
+    // Check if this is the current user's own profile
+    const isOwnProfile = user?._id === profileUserId
 
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }))
