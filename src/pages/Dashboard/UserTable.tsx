@@ -1,6 +1,6 @@
 
 import { useGetUsersQuery } from "@/redux/ApiCalls/userApi"
-import { columns } from "./TableData"
+import { createUserColumns } from "./TableData"
 import { ReusableDataTable } from "./ReuseableDataTable"
 
 export function UserTable() {
@@ -44,7 +44,7 @@ export function UserTable() {
             </div>
             <div className="rounded-lg border bg-card">
                 <ReusableDataTable
-                    columns={columns}
+                    columns={createUserColumns()}
                     data={data?.users || []}
                     searchKey="fullname"
                     searchPlaceholder="Search users..."

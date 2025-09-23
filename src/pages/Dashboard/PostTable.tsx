@@ -2,8 +2,13 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { useGetPostsQuery } from "@/redux/ApiCalls/postApi"
+import { Eye, Edit, Trash2 } from "lucide-react"
+import { useNavigate } from "react-router-dom"
+import { useGetPostsQuery, useDeletePostMutation } from "@/redux/ApiCalls/postApi"
 import { ReusableDataTable } from "./ReuseableDataTable"
+import { useState } from "react"
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog"
+import { toast } from "sonner"
 
 export type Post = {
     _id: string
@@ -29,7 +34,7 @@ export type Post = {
 }
 
 // Define columns for posts
-export const postColumns: ColumnDef<Post>[] = [
+export const createPostColumns = (): ColumnDef<Post>[] => [
     {
         accessorKey: "title",
         header: "Title",
@@ -103,10 +108,66 @@ export const postColumns: ColumnDef<Post>[] = [
         id: "actions",
         header: "",
         cell: ({ row }) => {
+            const post = row.original
+            const navigate = useNavigate()
+            const [deletePost, { isLoading: isDeleting }] = useDeletePostMutation()
+            const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
+            const handleView = () => {
+                navigate(`/dashboard/posts/${post._id}`)
+            }
+
+            const handleEdit = () => {
+                navigate(`/dashboard/posts/${post._id}?mode=edit`)
+            }
+
+            const handleDelete = async () => {
+                try {
+                    await deletePost(post._id).unwrap()
+                    toast.success("Post deleted successfully")
+                    setShowDeleteDialog(false)
+                } catch (error) {
+                    toast.error("Failed to delete post")
+                    console.error("Delete error:", error)
+                }
+            }
+
             return (
-                <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800">
-                    View
-                </Button>
+                <div className="flex items-center space-x-2">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleView}
+                        className="text-blue-600 hover:text-blue-800"
+                    >
+                        <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleEdit}
+                        className="text-green-600 hover:text-green-800"
+                    >
+                        <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowDeleteDialog(true)}
+                        className="text-red-600 hover:text-red-800"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+
+                    <ConfirmationDialog
+                        open={showDeleteDialog}
+                        onOpenChange={setShowDeleteDialog}
+                        title="Delete Post"
+                        description={`Are you sure you want to delete "${post.title}"? This action cannot be undone.`}
+                        onConfirm={handleDelete}
+                        isLoading={isDeleting}
+                    />
+                </div>
             )
         },
     },
@@ -153,7 +214,7 @@ export function PostTable() {
             </div>
             <div className="rounded-lg border bg-card">
                 <ReusableDataTable
-                    columns={postColumns}
+                    columns={createPostColumns()}
                     data={data?.posts || []}
                     searchKey="title"
                     searchPlaceholder="Search posts..."

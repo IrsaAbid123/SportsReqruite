@@ -11,6 +11,7 @@ export const userApi = createApi({
         }),
         getUser: builder.query<any, string>({
             query: (id) => `/${id}`,
+            providesTags: (result, error, id) => [{ type: "User", id }],
         }),
         deleteUser: builder.mutation<any, string>({
             query: (id) => ({
@@ -25,7 +26,10 @@ export const userApi = createApi({
                 method: "PUT",
                 body: data,
             }),
-            invalidatesTags: ["User"],
+            invalidatesTags: (result, error, { id }) => [
+                { type: "User", id },
+                "User"
+            ],
         }),
         getProfile: builder.query<any, string>({
             query: (id) => `/${id}/profile`,

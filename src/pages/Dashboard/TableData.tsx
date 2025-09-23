@@ -4,6 +4,12 @@ import type { ColumnDef } from "@tanstack/react-table"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Eye, Edit, Trash2 } from "lucide-react"
+import { useNavigate } from "react-router-dom"
+import { useDeleteUserMutation } from "@/redux/ApiCalls/userApi"
+import { useState } from "react"
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog"
+import { toast } from "sonner"
 
 export type User = {
     _id: string
@@ -22,7 +28,7 @@ export type User = {
     updatedAt: Date
 }
 
-export const columns: ColumnDef<User>[] = [
+export const createUserColumns = (): ColumnDef<User>[] => [
     {
         accessorKey: "fullname",
         header: "Name",
@@ -95,10 +101,66 @@ export const columns: ColumnDef<User>[] = [
         id: "actions",
         header: "",
         cell: ({ row }) => {
+            const user = row.original
+            const navigate = useNavigate()
+            const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation()
+            const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
+            const handleView = () => {
+                navigate(`/dashboard/users/${user._id}`)
+            }
+
+            const handleEdit = () => {
+                navigate(`/dashboard/users/${user._id}?mode=edit`)
+            }
+
+            const handleDelete = async () => {
+                try {
+                    await deleteUser(user._id).unwrap()
+                    toast.success("User deleted successfully")
+                    setShowDeleteDialog(false)
+                } catch (error) {
+                    toast.error("Failed to delete user")
+                    console.error("Delete error:", error)
+                }
+            }
+
             return (
-                <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800">
-                    Edit
-                </Button>
+                <div className="flex items-center space-x-2">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleView}
+                        className="text-blue-600 hover:text-blue-800"
+                    >
+                        <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleEdit}
+                        className="text-green-600 hover:text-green-800"
+                    >
+                        <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowDeleteDialog(true)}
+                        className="text-red-600 hover:text-red-800"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+
+                    <ConfirmationDialog
+                        open={showDeleteDialog}
+                        onOpenChange={setShowDeleteDialog}
+                        title="Delete User"
+                        description={`Are you sure you want to delete ${user.fullname}? This action cannot be undone.`}
+                        onConfirm={handleDelete}
+                        isLoading={isDeleting}
+                    />
+                </div>
             )
         },
     },

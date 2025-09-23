@@ -11,6 +11,7 @@ export const postApi = createApi({
         }),
         getPost: builder.query<any, string>({
             query: (id) => `/${id}`,
+            providesTags: (result, error, id) => [{ type: "Post", id }],
         }),
         createPost: builder.mutation<any, any>({
             query: (data) => ({
@@ -33,7 +34,10 @@ export const postApi = createApi({
                 method: "PUT",
                 body: data,
             }),
-            invalidatesTags: ["Post"],
+            invalidatesTags: (result, error, { id }) => [
+                { type: "Post", id },
+                "Post"
+            ],
         }),
     }),
 });
