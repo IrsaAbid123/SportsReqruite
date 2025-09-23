@@ -1,9 +1,14 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ListingCard } from "@/components/ListingCard"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { FaLocationDot } from "react-icons/fa6";
 import { FaFacebook, FaLinkedin, FaTwitter } from "react-icons/fa";
 import {
@@ -16,20 +21,65 @@ import { MdEdit } from "react-icons/md";
 import { HiDotsVertical } from "react-icons/hi"
 import { Trophy } from "lucide-react"
 import { useUser } from "@/context/UserContext"
-import { useGetProfileQuery } from "@/redux/ApiCalls/userApi"
+import { useGetProfileQuery, useUpdateUserMutation } from "@/redux/ApiCalls/userApi"
+import { toast } from "sonner"
+import { ageRangeOptions, experienceLevelOptions, positionOptions } from "@/constants/UserDataEnums"
 
 export default function ProfilePage() {
     const { user } = useUser()
     const { data, isLoading, error } = useGetProfileQuery(user?._id)
+    const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation()
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+    const [formData, setFormData] = useState({
+        fullname: "",
+        email: "",
+        location: "",
+        age: "",
+        experienceLevel: "",
+        position: "",
+        role: "",
+        bio: "",
+    })
 
     if (isLoading) return <div>Loading...</div>
     if (error) return <div>Error loading profile</div>
 
-    const profileUser = data?.user
+    const profileUser = data?.user || data
     const listings = data?.post || []
 
     // Check if this is the current user's own profile
     const isOwnProfile = user?._id === profileUser?._id
+
+    // Initialize form data when profile loads
+    useEffect(() => {
+        if (profileUser) {
+            setFormData({
+                fullname: profileUser.fullname || "",
+                email: profileUser.email || "",
+                location: profileUser.location || "",
+                age: profileUser.age || "",
+                experienceLevel: profileUser.experienceLevel || "",
+                position: profileUser.position || "",
+                role: profileUser.role || "",
+                bio: profileUser.bio || "",
+            })
+        }
+    }, [profileUser])
+
+    const handleInputChange = (field: string, value: string) => {
+        setFormData(prev => ({ ...prev, [field]: value }))
+    }
+
+    const handleSaveProfile = async () => {
+        try {
+            await updateUser({ id: user?._id!, data: formData }).unwrap()
+            toast.success("Profile updated successfully")
+            setIsEditModalOpen(false)
+        } catch (error) {
+            toast.error("Failed to update profile")
+            console.error("Update error:", error)
+        }
+    }
 
     return (
         <div className="min-h-screen bg-background">
@@ -98,7 +148,7 @@ export default function ProfilePage() {
                             )}
                         </div>
 
-                        <span className="text-md ">Coatches don't play and advusors alwats a good advusor as always </span>
+                        <span className="text-md ">{profileUser?.bio || "No bio available"}</span>
 
                         {/* Social Links */}
                         <div className="flex flex-row gap-5 py-5">
@@ -131,19 +181,155 @@ export default function ProfilePage() {
                     {/* Dropdown to edit your profile - only show for own profile */}
                     {isOwnProfile && (
                         <div className="">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-10 w-10 p-2">
-                                        <HiDotsVertical className="h-5 w-5" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-40" align="end" forceMount>
-                                    <DropdownMenuItem className="cursor-pointer">
-                                        <MdEdit className="mr-2 h-4 w-4" />
-                                        Edit Profile
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                            <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-10 w-10 p-2">
+                                            <HiDotsVertical className="h-5 w-5" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent className="w-40" align="end" forceMount>
+                                        <DropdownMenuItem
+                                            className="cursor-pointer"
+                                            onClick={() => setIsEditModalOpen(true)}
+                                        >
+                                            <MdEdit className="mr-2 h-4 w-4" />
+                                            Edit Profile
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+
+                                {/* Edit Profile Modal */}
+                                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                                    <DialogHeader>
+                                        <DialogTitle>Edit Profile</DialogTitle>
+                                    </DialogHeader>
+                                    <div className="space-y-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="fullname">Full Name</Label>
+                                                <Input
+                                                    id="fullname"
+                                                    value={formData.fullname}
+                                                    onChange={(e) => handleInputChange("fullname", e.target.value)}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="email">Email</Label>
+                                                <Input
+                                                    id="email"
+                                                    type="email"
+                                                    value={formData.email}
+                                                    onChange={(e) => handleInputChange("email", e.target.value)}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="location">Location</Label>
+                                                <Input
+                                                    id="location"
+                                                    value={formData.location}
+                                                    onChange={(e) => handleInputChange("location", e.target.value)}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="age">Age</Label>
+                                                <Select
+                                                    value={formData.age}
+                                                    onValueChange={(value) => handleInputChange("age", value)}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select age range" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {ageRangeOptions.map((age) => (
+                                                            <SelectItem key={age} value={age}>
+                                                                {age}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="role">Role</Label>
+                                                <Select
+                                                    value={formData.role}
+                                                    onValueChange={(value) => handleInputChange("role", value)}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select role" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="player">Player</SelectItem>
+                                                        <SelectItem value="team">Team</SelectItem>
+                                                        <SelectItem value="admin">Admin</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="position">Position</Label>
+                                                <Select
+                                                    value={formData.position}
+                                                    onValueChange={(value) => handleInputChange("position", value)}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select position" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {positionOptions.map((position) => (
+                                                            <SelectItem key={position} value={position}>
+                                                                {position}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="experienceLevel">Experience Level</Label>
+                                                <Select
+                                                    value={formData.experienceLevel}
+                                                    onValueChange={(value) => handleInputChange("experienceLevel", value)}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select experience level" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {experienceLevelOptions.map((level) => (
+                                                            <SelectItem key={level} value={level}>
+                                                                {level}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="bio">Bio</Label>
+                                            <Textarea
+                                                id="bio"
+                                                value={formData.bio}
+                                                onChange={(e) => handleInputChange("bio", e.target.value)}
+                                                placeholder="Tell us about yourself..."
+                                                rows={4}
+                                            />
+                                        </div>
+                                        <div className="flex justify-end space-x-2 pt-4">
+                                            <Button
+                                                variant="outline"
+                                                onClick={() => setIsEditModalOpen(false)}
+                                            >
+                                                Cancel
+                                            </Button>
+                                            <Button
+                                                onClick={handleSaveProfile}
+                                                disabled={isUpdating}
+                                                className="bg-gradient-redwhiteblued"
+                                            >
+                                                {isUpdating ? "Saving..." : "Save Changes"}
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
                         </div>
                     )}
                 </div>

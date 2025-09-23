@@ -14,6 +14,7 @@ import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLoginUserMutation, useRegisterUserMutation } from "@/redux/ApiCalls/authApi";
 import { useUser } from "@/context/UserContext";
+import { ageRangeOptions, experienceLevelOptions, positionOptions } from "@/constants/UserDataEnums";
 interface AuthFormProps {
   onLogin?: (credentials: { email: string; password: string }) => void;
   onRegister?: (userData: { name: string; email: string; password: string; role: string }) => void;
@@ -46,30 +47,6 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
     libraries: ['places', 'maps'],
   });
 
-  const ageRangeOptions = [
-    "6u",
-    "7u",
-    "8u",
-    "9u",
-    "10u",
-    "11u",
-    "12u",
-    "13u",
-    "14u",
-    "15u",
-    "16u",
-    "17u",
-    "18u",
-    "College",
-  ]
-
-  const experienceLevelOptions = ["A", "AA", "AAA", "Majors", "NAIA", "D3", "D2", "D1", "JuCo"];
-
-  const positionOptions = [
-    "Catcher", "Left Pitcher", "Right Pitcher", "First Base", "Second Base",
-    "Short Stop", "Third Base", "Left Outfield", "Center Outfield",
-    "Right Outfield", "DH",
-  ]
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

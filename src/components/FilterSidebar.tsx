@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Filter, X } from "lucide-react";
+import { ageRangeOptions, experienceLevelOptions, positionOptions } from "@/constants/UserDataEnums";
 
 export interface FilterOptions {
   userType: "all" | "players" | "teams";
@@ -22,19 +23,6 @@ interface FilterSidebarProps {
   onFiltersChange: (filters: FilterOptions) => void;
   onClearFilters: () => void;
 }
-
-const ages = [
-  "6u", "7u", "8u", "9u", "10u", "11u", "12u", "13u", "14u", "15u",
-  "16u", "17u", "18u", "College",
-];
-
-const experienceLevels = ["A", "AA", "AAA", "Majors", "NAIA", "D3", "D2", "D1", "JuCo"];
-
-const positions = [
-  "Catcher", "Left Pitcher", "Right Pitcher", "First Base", "Second Base",
-  "Short Stop", "Third Base", "Left Outfield", "Center Outfield",
-  "Right Outfield", "DH",
-];
 
 // predefined distance steps
 const distanceMarks = [5, 10, 20, 50, 100];
@@ -150,7 +138,7 @@ export const FilterSidebar = ({
         <div className="space-y-3">
           <Label className="text-sm font-medium">Age</Label>
           <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto">
-            {ages.map((age) => (
+            {ageRangeOptions.map((age) => (
               <Badge
                 key={age}
                 variant={safeFilters.age.includes(age) ? "default" : "outline"}
@@ -204,7 +192,7 @@ export const FilterSidebar = ({
         <div className="space-y-3">
           <Label className="text-sm font-medium">Experience</Label>
           <div className="flex flex-wrap gap-1">
-            {experienceLevels.map((level) => (
+            {experienceLevelOptions.map((level) => (
               <Badge
                 key={level}
                 variant={
@@ -228,7 +216,7 @@ export const FilterSidebar = ({
         <div className="space-y-3">
           <Label className="text-sm font-medium">Position</Label>
           <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto">
-            {positions.map((position) => (
+            {positionOptions.map((position) => (
               <Badge
                 key={position}
                 variant={

@@ -15,6 +15,7 @@ import {
 import { useCreatePostMutation } from "@/redux/ApiCalls/postApi";
 import { useUser } from "@/context/UserContext";
 import { useNavigate } from "react-router-dom";
+import { ageRangeOptions, experienceLevelOptions, positionOptions } from "@/constants/UserDataEnums";
 
 export default function CreatePost() {
   const navigate = useNavigate()
@@ -33,20 +34,7 @@ export default function CreatePost() {
   });
 
 
-  const ageRangeOptions = [
-    "6u", "7u", "8u", "9u", "10u", "11u", "12u", "13u", "14u",
-    "15u", "16u", "17u", "18u", "College",
-  ];
 
-  const experienceLevelOptions = [
-    "A", "AA", "AAA", "Majors", "NAIA", "D3", "D2", "D1", "JuCo",
-  ];
-
-  const positionOptions = [
-    "Catcher", "Left Pitcher", "Right Pitcher", "First Base", "Second Base",
-    "Short Stop", "Third Base", "Left Outfield", "Center Outfield",
-    "Right Outfield", "DH",
-  ];
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
