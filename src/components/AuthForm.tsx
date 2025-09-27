@@ -32,7 +32,7 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
   const [positionSelectOpen, setPositionSelectOpen] = useState(false);
   const [registerData, setRegisterData] = useState({
     firstName: "",
-    lastNameInitial: "",
+    lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -77,7 +77,7 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
 
     try {
       const payload = {
-        fullname: `${registerData.firstName} ${registerData.lastNameInitial}`,
+        fullname: `${registerData.firstName} ${registerData.lastName}`,
         email: registerData.email,
         password: registerData.password,
         role: registerData.role,
@@ -203,14 +203,13 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="register-lastname">Last Name Initial</Label>
+                      <Label htmlFor="register-lastname">Second Name</Label>
                       <Input
                         id="register-lastname"
                         type="text"
-                        placeholder="D"
-                        maxLength={1}
-                        value={registerData.lastNameInitial}
-                        onChange={(e) => setRegisterData({ ...registerData, lastNameInitial: e.target.value.toUpperCase() })}
+                        placeholder="Doe"
+                        value={registerData.lastName}
+                        onChange={(e) => setRegisterData({ ...registerData, lastName: e.target.value })}
                         required
                       />
                     </div>
