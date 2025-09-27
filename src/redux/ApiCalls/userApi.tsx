@@ -31,6 +31,22 @@ export const userApi = createApi({
                 "User"
             ],
         }),
+        followUser: builder.mutation<any, { currentUserId: string; targetUserId: string }>({
+            query: ({ currentUserId, targetUserId }) => ({
+                url: `/${targetUserId}/follow`,
+                method: "POST",
+                body: { currentUserId },
+            }),
+            invalidatesTags: ["User"],
+        }),
+        unfollowUser: builder.mutation<any, { currentUserId: string; targetUserId: string }>({
+            query: ({ currentUserId, targetUserId }) => ({
+                url: `/${targetUserId}/unfollow`,
+                method: "POST",
+                body: { currentUserId },
+            }),
+            invalidatesTags: ["User"],
+        }),
         getProfile: builder.query<any, string>({
             query: (id) => `/${id}/profile`,
             providesTags: ["User"],
@@ -43,5 +59,7 @@ export const {
     useGetUserQuery,
     useDeleteUserMutation,
     useUpdateUserMutation,
-    useGetProfileQuery
+    useGetProfileQuery,
+    useFollowUserMutation,
+    useUnfollowUserMutation
 } = userApi;

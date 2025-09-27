@@ -8,8 +8,14 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     // ✅ Load user from localStorage on app start
     useEffect(() => {
         const savedUser = localStorage.getItem("user");
-        if (savedUser) {
-            setUser(JSON.parse(savedUser));
+        if (savedUser && savedUser !== "undefined" && savedUser !== "null") {
+            try {
+                setUser(JSON.parse(savedUser));
+            } catch (error) {
+                console.error("Error parsing user data from localStorage:", error);
+                // Clear invalid data
+                localStorage.removeItem("user");
+            }
         }
     }, []);
 

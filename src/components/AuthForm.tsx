@@ -10,6 +10,9 @@ import { Trophy, Users, Shield } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox"
 import { GoogleMap, useJsApiLoader, StandaloneSearchBox } from '@react-google-maps/api'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLoginUserMutation, useRegisterUserMutation } from "@/redux/ApiCalls/authApi";
@@ -26,8 +29,10 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
   const mapRef = useRef(null);
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
   const [loginData, setLoginData] = useState({ email: "", password: "" });
+  const [positionSelectOpen, setPositionSelectOpen] = useState(false);
   const [registerData, setRegisterData] = useState({
-    name: "",
+    firstName: "",
+    lastNameInitial: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -35,7 +40,7 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
     location: "",
     ageRanges: [] as string[],
     experienceLevels: [] as string[],
-    positions: "",
+    positions: [] as string[],
   });
 
   // ✅ RTK mutation hook
@@ -72,14 +77,14 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
 
     try {
       const payload = {
-        fullname: registerData.name,
+        fullname: `${registerData.firstName} ${registerData.lastNameInitial}`,
         email: registerData.email,
         password: registerData.password,
         role: registerData.role,
         location: registerData.location,
         age: registerData.ageRanges[0] || "",
         experienceLevel: registerData.experienceLevels[0] || "",
-        position: registerData.positions,
+        position: registerData.positions.join(", "),
       };
       const response = await registerUser(payload).unwrap();
 
@@ -186,13 +191,26 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="register-name">Full Name</Label>
+                      <Label htmlFor="register-firstname">First Name</Label>
                       <Input
-                        id="register-name"
+                        id="register-firstname"
                         type="text"
-                        placeholder="John Doe"
-                        value={registerData.name}
-                        onChange={(e) => setRegisterData({ ...registerData, name: e.target.value })}
+                        placeholder="John"
+                        value={registerData.firstName}
+                        onChange={(e) => setRegisterData({ ...registerData, firstName: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="register-lastname">Last Name Initial</Label>
+                      <Input
+                        id="register-lastname"
+                        type="text"
+                        placeholder="D"
+                        maxLength={1}
+                        value={registerData.lastNameInitial}
+                        onChange={(e) => setRegisterData({ ...registerData, lastNameInitial: e.target.value.toUpperCase() })}
                         required
                       />
                     </div>
@@ -237,7 +255,7 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="location">Location</Label>
+                    <Label htmlFor="location">Location (Address, City, or ZIP Code)</Label>
                     <StandaloneSearchBox onLoad={(ref) => mapRef.current = ref}
                       onPlacesChanged={handlePlacesChanged}>
                       <Input
@@ -298,24 +316,57 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
 
                       {/* Position */}
                       <div className="space-y-3">
-                        <Label htmlFor="positions">Position</Label>
-                        <Select
-                          value={registerData.positions}
-                          onValueChange={(val) =>
-                            setRegisterData({ ...registerData, positions: val })
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select Position" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {positionOptions.map((position) => (
-                              <SelectItem key={position} value={position}>
-                                {position}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Label htmlFor="positions">Position(s)</Label>
+                        <Popover open={positionSelectOpen} onOpenChange={setPositionSelectOpen}>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={positionSelectOpen}
+                              className="w-full justify-between"
+                            >
+                              {registerData.positions.length > 0
+                                ? `${registerData.positions.length} position(s) selected`
+                                : "Select positions..."}
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-full p-0">
+                            <Command>
+                              <CommandInput placeholder="Search positions..." />
+                              <CommandList>
+                                <CommandEmpty>No positions found.</CommandEmpty>
+                                <CommandGroup>
+                                  {positionOptions.map((position) => (
+                                    <CommandItem
+                                      key={position}
+                                      value={position}
+                                      onSelect={() => {
+                                        if (registerData.positions.includes(position)) {
+                                          setRegisterData({
+                                            ...registerData,
+                                            positions: registerData.positions.filter(p => p !== position)
+                                          });
+                                        } else {
+                                          setRegisterData({
+                                            ...registerData,
+                                            positions: [...registerData.positions, position]
+                                          });
+                                        }
+                                      }}
+                                    >
+                                      <Check
+                                        className={`mr-2 h-4 w-4 ${registerData.positions.includes(position) ? "opacity-100" : "opacity-0"
+                                          }`}
+                                      />
+                                      {position}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
                       </div>
                     </>
                   )}
