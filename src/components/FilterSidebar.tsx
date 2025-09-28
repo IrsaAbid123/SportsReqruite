@@ -7,9 +7,10 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Filter, X } from "lucide-react";
 import { ageRangeOptions, experienceLevelOptions, positionOptions } from "@/constants/UserDataEnums";
+import { UserRoleEnum } from "@/constants/UserRoleEnums";
 
 export interface FilterOptions {
-  userType: "all" | "players" | "teams";
+  userType: "all" | "player" | "coach" | "admin";
   status: "all" | "available" | "filled";
   age: string[];
   distance: number;
@@ -98,7 +99,7 @@ export const FilterSidebar = ({
         <div className="space-y-3">
           <Label className="text-sm font-medium">User Type</Label>
           <div className="flex flex-wrap gap-2">
-            {["all", "players", "teams"].map((type) => (
+            {["all", UserRoleEnum.PLAYER, UserRoleEnum.COACH, UserRoleEnum.ADMIN].map((type) => (
               <Badge
                 key={type}
                 variant={safeFilters.userType === type ? "default" : "outline"}
@@ -108,7 +109,7 @@ export const FilterSidebar = ({
                   }`}
                 onClick={() => updateFilter("userType", type)}
               >
-                {type.charAt(0).toUpperCase() + type.slice(1)}
+                {type === "all" ? "All" : type.charAt(0).toUpperCase() + type.slice(1)}
               </Badge>
             ))}
           </div>
