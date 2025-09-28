@@ -60,7 +60,7 @@ export function DashboardLayout({ children, activeTab, setActiveTab }: Dashboard
         <div className="flex h-screen bg-background flex-col">
             {/* Mobile Header */}
             <div className="lg:hidden flex items-center justify-between p-4 border-b bg-card">
-                <h1 className="text-lg font-semibold">Dashboard</h1>
+                <h1 className="text-lg font-semibold ">Dashboard</h1>
                 <Button
                     variant="ghost"
                     size="sm"
@@ -75,7 +75,7 @@ export function DashboardLayout({ children, activeTab, setActiveTab }: Dashboard
                 {/* Sidebar */}
                 <div
                     className={cn(
-                        "fixed left-0 z-50 h-screen w-64 bg-sidebar border-r border-sidebar-border transform transition-transform duration-200 ease-in-out lg:translate-x-0",
+                        "fixed left-0 top-0 z-50 h-screen w-64 bg-sidebar border-r border-sidebar-border transform transition-transform duration-200 ease-in-out lg:translate-x-0",
                         sidebarOpen ? "translate-x-0" : "-translate-x-full"
                     )}
                 >
