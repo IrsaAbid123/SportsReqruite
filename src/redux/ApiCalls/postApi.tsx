@@ -9,6 +9,25 @@ export const postApi = createApi({
             query: () => "/",
             providesTags: ["Post"],
         }),
+        getFilteredPosts: builder.mutation<any, any>({
+            query: (filters) => {
+                const params = new URLSearchParams();
+                Object.entries(filters).forEach(([key, value]) => {
+                    if (value && value !== 'all' && (Array.isArray(value) ? value.length > 0 : true)) {
+                        if (Array.isArray(value)) {
+                            value.forEach(v => params.append(key, v));
+                        } else {
+                            params.append(key, value as string);
+                        }
+                    }
+                });
+                return {
+                    url: `/filter?${params.toString()}`,
+                    method: 'GET',
+                };
+            },
+            invalidatesTags: ["Post"],
+        }),
         getPost: builder.query<any, string>({
             query: (id) => `/${id}`,
             providesTags: (result, error, id) => [{ type: "Post", id }],
@@ -44,6 +63,7 @@ export const postApi = createApi({
 
 export const {
     useGetPostsQuery,
+    useGetFilteredPostsMutation,
     useGetPostQuery,
     useDeletePostMutation,
     useUpdatePostMutation,

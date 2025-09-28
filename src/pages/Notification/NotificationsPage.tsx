@@ -14,16 +14,16 @@ interface NotificationSheetProps {
 
 export const NotificationSheet = ({ notifications }: NotificationSheetProps) => {
   return (
-    <SheetContent side="right" className="w-80 p-0">
-      <SheetHeader className="p-6 pb-4 border-b">
-        <SheetTitle className="text-left">Notifications</SheetTitle>
+    <SheetContent side="right" className="w-80 sm:w-96 p-0">
+      <SheetHeader className="p-4 sm:p-6 pb-4 border-b">
+        <SheetTitle className="text-left text-lg sm:text-xl">Notifications</SheetTitle>
         <h2 className="text-2xl font-bold mb-6 text-center bg-gradient-redwhiteblued bg-clip-text text-transparent"></h2>
       </SheetHeader>
       <div className="flex flex-col">
         {notifications.map((notification) => (
           <div
             key={notification.id}
-            className="flex items-start gap-3 p-4 hover:bg-muted/50 transition-colors cursor-pointer border-b border-border/50 last:border-b-0"
+            className="flex items-start gap-3 p-3 sm:p-4 hover:bg-muted/50 transition-colors cursor-pointer border-b border-border/50 last:border-b-0"
           >
             <Avatar className="h-10 w-10 flex-shrink-0">
               <AvatarImage

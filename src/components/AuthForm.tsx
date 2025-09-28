@@ -116,12 +116,12 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
       <Card className="w-full max-w-md bg-card shadow-elevated border-border/50">
         <CardHeader className="text-center pb-4">
           <div className="flex justify-center mb-4">
-            <div className="text-4xl font-bold bg-gradient-redwhiteblued bg-clip-text text-transparent">
+            <div className="text-3xl sm:text-4xl font-bold bg-gradient-redwhiteblued bg-clip-text text-transparent">
               SportRecruit
             </div>
           </div>
-          <CardTitle className="text-2xl">Join the Game</CardTitle>
-          <p className="text-muted-foreground">Connect players, teams, and opportunities</p>
+          <CardTitle className="text-xl sm:text-2xl">Join the Game</CardTitle>
+          <p className="text-muted-foreground text-sm sm:text-base">Connect players, teams, and opportunities</p>
         </CardHeader>
 
         <CardContent>
@@ -189,7 +189,7 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Basic Information</h3>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="register-firstname">First Name</Label>
                       <Input
@@ -213,21 +213,21 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
                         required
                       />
                     </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="register-email">Email</Label>
-                      <Input
-                        id="register-email"
-                        type="email"
-                        placeholder="your@email.com"
-                        value={registerData.email}
-                        onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-                        required
-                      />
-                    </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="register-email">Email</Label>
+                    <Input
+                      id="register-email"
+                      type="email"
+                      placeholder="your@email.com"
+                      value={registerData.email}
+                      onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="register-password">Password</Label>
                       <Input

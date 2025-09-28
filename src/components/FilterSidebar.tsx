@@ -22,6 +22,8 @@ interface FilterSidebarProps {
   filters: FilterOptions;
   onFiltersChange: (filters: FilterOptions) => void;
   onClearFilters: () => void;
+  onApplyFilters?: () => void;
+  isFiltered?: boolean;
 }
 
 // predefined distance steps
@@ -31,6 +33,8 @@ export const FilterSidebar = ({
   filters,
   onFiltersChange,
   onClearFilters,
+  onApplyFilters,
+  isFiltered = false,
 }: FilterSidebarProps) => {
   // ✅ fallback arrays to avoid includes on undefined
   const safeFilters: FilterOptions = {
@@ -71,8 +75,8 @@ export const FilterSidebar = ({
     <Card className="w-full max-w-sm shadow-card border-border/50">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center text-lg">
-            <Filter className="h-5 w-5 mr-2" />
+          <CardTitle className="flex items-center text-base sm:text-lg">
+            <Filter className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
             Filters
           </CardTitle>
           {hasActiveFilters && (
@@ -233,6 +237,23 @@ export const FilterSidebar = ({
             ))}
           </div>
         </div>
+
+        {/* Apply Filters Button */}
+        {onApplyFilters && (
+          <div className="p-4 border-t">
+            <Button
+              onClick={onApplyFilters}
+              className={`w-full transition-opacity ${isFiltered
+                ? "bg-green-600 hover:bg-green-700"
+                : "bg-gradient-redwhiteblued hover:opacity-90"
+                }`}
+              disabled={!hasActiveFilters}
+            >
+              <Filter className="h-4 w-4 mr-2" />
+              {isFiltered ? "Filters Applied" : "Apply Filters"}
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

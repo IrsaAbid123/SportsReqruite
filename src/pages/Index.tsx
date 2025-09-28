@@ -11,14 +11,15 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "@/context/UserContext";
 import { UserRoleEnum } from "@/constants/UserRoleEnums";
 import Dashboard from "./Dashboard/index";
-import { useGetPostsQuery } from "@/redux/ApiCalls/postApi";
+import { useGetPostsQuery, useGetFilteredPostsMutation } from "@/redux/ApiCalls/postApi";
 
 const Index = () => {
   const navigate = useNavigate()
   const { user, setUser } = useUser();
   const isAuthenticated = !!user;
   const { data: postsData, isLoading, error } = useGetPostsQuery();
-  const listings = postsData?.posts || [];
+  const [isFiltered, setIsFiltered] = useState(false);
+  const [filteredPostsData, setFilteredPostsData] = useState<any>(null);
   const [filters, setFilters] = useState<FilterOptions>({
     userType: 'all',
     age: ["16u", "17u"],
@@ -28,6 +29,19 @@ const Index = () => {
     position: [] as string[],
     status: 'all'
   });
+
+  // Prepare filter parameters for the API
+  const filterParams = {
+    experienceLevel: filters.experience.length > 0 ? filters.experience[0] : undefined,
+    age: filters.age.length > 0 ? filters.age[0] : undefined,
+    position: filters.position.length > 0 ? filters.position[0] : undefined,
+    location: filters.zipOrCityState || undefined,
+    role: filters.userType !== 'all' ? filters.userType : undefined,
+  };
+
+  const [getFilteredPosts, { isLoading: isFilterLoading }] = useGetFilteredPostsMutation();
+
+  const listings = isFiltered ? (filteredPostsData?.posts || []) : (postsData?.posts || []);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -57,27 +71,24 @@ const Index = () => {
       position: [] as string[],
       status: 'all'
     });
+    setIsFiltered(false);
+    setFilteredPostsData(null);
   };
 
-  // Filter listings based on current filters
-  const filteredListings = listings.filter(listing => {
-    if (filters.userType !== 'all' &&
-      ((filters.userType === 'players' && listing.author?.role !== 'player') ||
-        (filters.userType === 'teams' && listing.author?.role !== 'team'))) {
-      return false;
+  const applyFilters = async () => {
+    try {
+      setIsFiltered(true);
+      // Trigger the API call when apply filters is clicked
+      const result = await getFilteredPosts(filterParams).unwrap();
+      setFilteredPostsData(result);
+    } catch (error) {
+      console.error('Failed to fetch filtered posts:', error);
+      setIsFiltered(false);
     }
+  };
 
-    if (filters.status !== 'all' && listing.status !== filters.status) {
-      return false;
-    }
-
-    if (filters.experience.length > 0 &&
-      !filters.experience.some(exp => listing.tags.includes(exp))) {
-      return false;
-    }
-
-    return true;
-  });
+  // Use listings directly since filtering is now done server-side
+  const filteredListings = listings;
 
   // if (user?.role === UserRoleEnum.ADMIN) {
   //   return (
@@ -166,38 +177,43 @@ const Index = () => {
         <div className="absolute inset-0 bg-black/40" />
 
         {/* Actual Content */}
-        <div className="relative container px-16 py-8">
+        <div className="relative container px-4 sm:px-8 lg:px-16 py-8">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Filters Sidebar */}
             <aside className="lg:w-80">
-              <div className=" top-24">
+              <div className="lg:sticky lg:top-24">
                 <FilterSidebar
                   filters={filters}
                   onFiltersChange={setFilters}
                   onClearFilters={clearFilters}
+                  onApplyFilters={applyFilters}
+                  isFiltered={isFiltered}
                 />
               </div>
             </aside>
 
             {/* Feed */}
             <main className="flex-1">
-              <div className="mb-6 flex items-center justify-between">
+              <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <h2 className="text-2xl font-bold text-white mb-2">
+                  <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
                     Latest Opportunities
                   </h2>
-                  <div className="flex items-center space-x-2 text-sm text-white/80">
-                    <span>{filteredListings.length} listings found</span>
-                    {(filters.userType !== 'all' || filters.status !== 'all' ||
-                      filters.experience.length > 0) && (
-                        <Badge variant="outline" className="ml-2 text-white">
-                          Filtered
-                        </Badge>
-                      )}
+                  <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 text-sm text-white/80">
+                    <span>
+                      {filteredListings.length} {isFiltered ? 'filtered' : ''} listings found
+                    </span>
+                    {isFiltered && (
+                      <Badge variant="outline" className="text-white border-white/30">
+                        Filtered
+                      </Badge>
+                    )}
                   </div>
                 </div>
 
-                <Button className="bg-gradient-redwhiteblued hover:opacity-90 transition-opacity"
+                <Button
+                  size="sm"
+                  className="bg-gradient-redwhiteblued hover:opacity-90 transition-opacity w-full sm:w-auto"
                   onClick={() => {
                     if (isAuthenticated) {
                       navigate('/create-post');
@@ -211,7 +227,17 @@ const Index = () => {
               </div>
 
               <div className="space-y-6">
-                {filteredListings.length > 0 ? (
+                {(isLoading || isFilterLoading) ? (
+                  <Card className="p-6 sm:p-8 text-center bg-white/80">
+                    <CardContent>
+                      <Trophy className="h-12 w-12 mx-auto mb-4 text-muted-foreground animate-pulse" />
+                      <h3 className="text-lg font-semibold mb-2">Loading...</h3>
+                      <p className="text-muted-foreground">
+                        {isFiltered ? "Applying filters..." : "Loading opportunities..."}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : filteredListings.length > 0 ? (
                   filteredListings.map((listing) => (
                     <ListingCard
                       key={listing._id}
@@ -221,12 +247,15 @@ const Index = () => {
                     />
                   ))
                 ) : (
-                  <Card className="p-8 text-center bg-white/80">
+                  <Card className="p-6 sm:p-8 text-center bg-white/80">
                     <CardContent>
                       <Trophy className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                       <h3 className="text-lg font-semibold mb-2">No listings found</h3>
                       <p className="text-muted-foreground">
-                        Try adjusting your filters or check back later for new opportunities.
+                        {isFiltered
+                          ? "No posts match your current filters. Try adjusting your search criteria."
+                          : "Try adjusting your filters or check back later for new opportunities."
+                        }
                       </p>
                     </CardContent>
                   </Card>

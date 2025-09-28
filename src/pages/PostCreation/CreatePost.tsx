@@ -86,9 +86,9 @@ export default function CreatePost() {
 
 
   return (
-    <div className="min-h-screen grid grid-cols-1 md:grid-cols-2">
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
       {/* Left Side - Branding / Image */}
-      <div className="relative hidden md:flex flex-col justify-center items-center bg-gradient-redwhiteblued text-white overflow-hidden">
+      <div className="relative hidden lg:flex flex-col justify-center items-center bg-gradient-redwhiteblued text-white overflow-hidden">
         <img
           src="https://images.unsplash.com/photo-1517649763962-0c623066013b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
           alt="Basketball Player"
@@ -104,9 +104,9 @@ export default function CreatePost() {
       </div>
 
       {/* Right Side - Form */}
-      <div className="flex items-center justify-center p-6 md:p-12 bg-background">
-        <Card className="w-full max-w-xl p-8 shadow-elevated border border-border/50">
-          <h2 className="text-2xl font-bold mb-6 text-center bg-gradient-redwhiteblued bg-clip-text text-transparent">
+      <div className="flex items-center justify-center p-4 sm:p-6 lg:p-12 bg-background">
+        <Card className="w-full max-w-xl p-6 sm:p-8 shadow-elevated border border-border/50">
+          <h2 className="text-xl sm:text-2xl font-bold mb-6 text-center bg-gradient-redwhiteblued bg-clip-text text-transparent">
             Create a New Post
           </h2>
 
@@ -154,7 +154,7 @@ export default function CreatePost() {
             {/* Requirements */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Requirements</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Age */}
                 <div className="space-y-2">
                   <Label htmlFor="age">Age Range</Label>

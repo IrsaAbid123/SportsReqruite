@@ -45,6 +45,38 @@ export const authApi = createApi({
                 body: data,
             }),
         }),
+
+        // ✅ Admin Management APIs
+        getAdmins: builder.query<any, void>({
+            query: () => "users/admins",
+        }),
+
+        getAdmin: builder.query<any, string>({
+            query: (id) => `admin/admins/${id}`,
+        }),
+
+        inviteAdmin: builder.mutation<any, any>({
+            query: (adminData) => ({
+                url: "admin/invite",
+                method: "POST",
+                body: adminData,
+            }),
+        }),
+
+        updateAdmin: builder.mutation<any, { id: string; data: any }>({
+            query: ({ id, data }) => ({
+                url: `admin/admins/${id}`,
+                method: "PUT",
+                body: data,
+            }),
+        }),
+
+        deleteAdmin: builder.mutation<any, string>({
+            query: (id) => ({
+                url: `admin/admins/${id}`,
+                method: "DELETE",
+            }),
+        }),
     }),
 });
 
@@ -54,4 +86,9 @@ export const {
     useForgotPasswordMutation,
     useVerifyOtpMutation,
     useResetPasswordMutation,
+    useGetAdminsQuery,
+    useGetAdminQuery,
+    useInviteAdminMutation,
+    useUpdateAdminMutation,
+    useDeleteAdminMutation,
 } = authApi;

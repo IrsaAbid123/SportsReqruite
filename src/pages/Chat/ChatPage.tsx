@@ -150,7 +150,7 @@ export function ChatPage() {
     return (
         <div className="flex h-screen bg-background">
             {/* Sidebar */}
-            <div className="w-80 border-r border-border bg-card hidden md:flex flex-col">
+            <div className="w-80 border-r border-border bg-card hidden lg:flex flex-col">
                 {/* Sidebar Header */}
                 <div className="p-4 border-b border-border">
                     <div className="flex items-center justify-between mb-4">
@@ -274,7 +274,7 @@ export function ChatPage() {
                                 className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"} group`}
                             >
                                 <div
-                                    className={`max-w-xs lg:max-w-md xl:max-w-lg ${message.sender === "user" ? "order-2" : "order-1"}`}
+                                    className={`max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl ${message.sender === "user" ? "order-2" : "order-1"}`}
                                 >
                                     <div
                                         className={`relative px-4 py-2 rounded-2xl ${message.sender === "user"

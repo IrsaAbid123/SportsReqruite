@@ -163,22 +163,22 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-between pt-2 space-x-2">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-2 gap-3">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => onSave?.(listing._id)}
-              className="text-black hover:text-foreground"
+              className="text-black hover:text-foreground w-full sm:w-auto"
             >
               Save
             </Button>
 
-            <div className="flex space-x-2">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <Button
                 size="sm"
                 onClick={() => setShareOpen(true)}
                 variant="outline"
-                className="flex items-center gap-1"
+                className="flex items-center justify-center gap-1 w-full sm:w-auto"
               >
                 <Share2 className="h-4 w-4" />
                 Share
@@ -186,11 +186,10 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
               <Button
                 size="sm"
                 onClick={() => navigate("/chat")}
-                className={
-                  listing.status === "available" && !isExpired
+                className={`w-full sm:w-auto ${listing.status === "available" && !isExpired
                     ? "bg-gradient-redwhiteblued hover:opacity-90 transition-opacity"
                     : ""
-                }
+                  }`}
               >
                 {authorRole === "player" ? "Contact Player" : "Contact Team"}
               </Button>

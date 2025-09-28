@@ -140,48 +140,48 @@ export default function ProfilePage() {
             </div>
 
             {/* Profile Info */}
-            <section className="py-10 px-32 bg-card border-b flex flex-row">
-                <div>
-                    <Avatar className="w-44 -mt-28 h-44 mb-4 border-4 border-white shadow-lg">
+            <section className="py-6 sm:py-10 px-4 sm:px-8 lg:px-32 bg-card border-b flex flex-col sm:flex-row gap-6">
+                <div className="flex justify-center sm:justify-start">
+                    <Avatar className="w-32 h-32 sm:w-44 sm:h-44 -mt-16 sm:-mt-28 mb-4 border-4 border-white shadow-lg">
                         <AvatarImage src={"/placeholder.svg"} alt={profileUser?.fullname} />
-                        <AvatarFallback className="text-2xl font-bold bg-primary text-primary-foreground">
+                        <AvatarFallback className="text-xl sm:text-2xl font-bold bg-primary text-primary-foreground">
                             {profileUser?.fullname?.split(" ").map(n => n[0]).join("")}
                         </AvatarFallback>
                     </Avatar>
                 </div>
 
-                <div className="flex flex-row w-full justify-between items-start">
+                <div className="flex flex-col sm:flex-row w-full justify-between items-start gap-4">
                     <div className="flex-1">
                         {/* Name */}
-                        <div className="flex items-center gap-3 mb-2">
-                            <p className="text-xl font-bold">{profileUser?.fullname}</p>
-                            {profileUser?.verified && <Badge variant="default" className="bg-green-500">Verified</Badge>}
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                            <p className="text-lg sm:text-xl font-bold">{profileUser?.fullname}</p>
+                            {profileUser?.verified && <Badge variant="default" className="bg-green-500 w-fit">Verified</Badge>}
                         </div>
 
                         {/* Role/Position */}
-                        <div className="flex items-center gap-4 mb-2">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-2">
                             <Badge variant="outline" className="capitalize">{profileUser?.role}</Badge>
                             {profileUser?.position && <Badge variant="secondary" className="capitalize">{profileUser.position}</Badge>}
                         </div>
 
                         {/* Age/Experience */}
-                        <div className="flex items-center gap-4 mb-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3">
                             {profileUser?.age && <span className="text-sm text-gray-600">Age: <span className="font-medium">{profileUser.age}</span></span>}
                             {profileUser?.experienceLevel && <span className="text-sm text-gray-600">Experience: <span className="font-medium">{profileUser.experienceLevel}</span></span>}
                         </div>
 
                         {/* Bio */}
-                        <span className="text-md">{profileUser?.bio || "No bio available"}</span>
+                        <span className="text-sm sm:text-md">{profileUser?.bio || "No bio available"}</span>
 
                         {/* Location */}
-                        <div className="flex flex-row gap-5 py-5">
+                        <div className="flex flex-row gap-5 py-3 sm:py-5">
                             <span className="text-gray-400 flex flex-row items-center text-sm gap-1">
                                 <FaLocationDot /> {profileUser?.location}
                             </span>
                         </div>
 
                         {/* Stats */}
-                        <div className="flex items-center gap-6 text-sm">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-sm">
                             <span className="text-gray-600">
                                 <span className="font-semibold">{profileUser?.followers?.length || 0}</span> Followers
                             </span>
@@ -241,7 +241,7 @@ export default function ProfilePage() {
                             </Dialog>
                         ) : (
                             <Button
-                                className={`w-full py-3 px-6 rounded-full flex items-center justify-center ${isFollowing ? "bg-gray-400 text-white" : "bg-gradient-redwhiteblued text-white"}`}
+                                className={`w-full sm:w-auto py-3 px-6 rounded-full flex items-center justify-center ${isFollowing ? "bg-gray-400 text-white" : "bg-gradient-redwhiteblued text-white"}`}
                                 onClick={handleFollowToggle}
                             >
                                 {isFollowing ? "Unfollow" : "Follow"}
@@ -252,20 +252,20 @@ export default function ProfilePage() {
             </section>
 
             {/* Profile Posts */}
-            <div className="container flex flex-row px-32 py-10 gap-10">
-                <div className="p-6">
+            <div className="container flex flex-col lg:flex-row px-4 sm:px-8 lg:px-32 py-6 sm:py-10 gap-6 lg:gap-10">
+                <div className="p-4 sm:p-6">
                     <div className="space-y-3 mb-5">
                         <div className="flex items-center text-sm">
                             <svg className="w-4 h-4 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
                             </svg>
-                            <a href={`mailto:${profileUser?.email}`} className="text-gray-400 hover:underline">{profileUser?.email}</a>
+                            <a href={`mailto:${profileUser?.email}`} className="text-gray-400 hover:underline break-all">{profileUser?.email}</a>
                         </div>
                     </div>
                 </div>
 
                 <div className="space-y-6 flex-1">
-                    <div className="text-4xl font-bold bg-gradient-redwhiteblued bg-clip-text text-transparent">
+                    <div className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-redwhiteblued bg-clip-text text-transparent">
                         {isOwnProfile ? "My Posts" : `${profileUser?.fullname}'s Posts`}
                     </div>
                     {listings.length > 0 ? (

@@ -177,42 +177,42 @@ export function PostTable() {
     const { data, isLoading, isError } = useGetPostsQuery()
 
     if (isLoading) return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight">Posts</h1>
-                <p className="text-muted-foreground">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Posts</h1>
+                <p className="text-muted-foreground text-sm sm:text-base">
                     Manage recruitment opportunities and job postings
                 </p>
             </div>
-            <div className="rounded-lg border bg-card p-6">
+            <div className="rounded-lg border bg-card p-4 sm:p-6">
                 <p>Loading posts...</p>
             </div>
         </div>
     )
 
     if (isError) return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight">Posts</h1>
-                <p className="text-muted-foreground">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Posts</h1>
+                <p className="text-muted-foreground text-sm sm:text-base">
                     Manage recruitment opportunities and job postings
                 </p>
             </div>
-            <div className="rounded-lg border bg-card p-6">
+            <div className="rounded-lg border bg-card p-4 sm:p-6">
                 <p>Failed to load posts</p>
             </div>
         </div>
     )
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight">Posts</h1>
-                <p className="text-muted-foreground">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Posts</h1>
+                <p className="text-muted-foreground text-sm sm:text-base">
                     Manage recruitment opportunities and job postings
                 </p>
             </div>
-            <div className="rounded-lg border bg-card">
+            <div className="rounded-lg border bg-card overflow-hidden">
                 <ReusableDataTable
                     columns={createPostColumns()}
                     data={data?.posts || []}
