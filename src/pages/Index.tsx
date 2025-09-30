@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { ListingCard } from "@/components/ListingCard";
+import { UserCard } from "@/components/UserCard";
+import { ProfileModal } from "@/components/ProfileModal";
 import { FilterSidebar, FilterOptions } from "@/components/FilterSidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +22,9 @@ const Index = () => {
   const { data: postsData, isLoading, error } = useGetPostsQuery();
   const [isFiltered, setIsFiltered] = useState(false);
   const [filteredPostsData, setFilteredPostsData] = useState<any>(null);
+  const [usersData, setUsersData] = useState<any[]>([]);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     userType: 'all',
     age: ["16u", "17u"],
@@ -42,6 +47,14 @@ const Index = () => {
   const [getFilteredPosts, { isLoading: isFilterLoading }] = useGetFilteredPostsMutation();
 
   const listings = isFiltered ? (filteredPostsData?.posts || []) : (postsData?.posts || []);
+  const rawUsers = isFiltered ? (filteredPostsData?.users || []) : (postsData?.users || []);
+
+  // Sort users: Available first, then Filled
+  const users = [...rawUsers].sort((a, b) => {
+    if (a.status === 'available' && b.status !== 'available') return -1;
+    if (a.status !== 'available' && b.status === 'available') return 1;
+    return 0;
+  });
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -61,6 +74,20 @@ const Index = () => {
     console.log("Save listing:", listingId);
   };
 
+  const handleUserContact = (userId: string) => {
+    console.log("Contact user:", userId);
+  };
+
+  const handleUserClick = (user: any) => {
+    setSelectedUser(user);
+    setIsProfileModalOpen(true);
+  };
+
+  const handleCloseProfileModal = () => {
+    setIsProfileModalOpen(false);
+    setSelectedUser(null);
+  };
+
   const clearFilters = () => {
     setFilters({
       userType: 'all',
@@ -73,6 +100,7 @@ const Index = () => {
     });
     setIsFiltered(false);
     setFilteredPostsData(null);
+    setUsersData([]);
   };
 
   const applyFilters = async () => {
@@ -81,6 +109,7 @@ const Index = () => {
       // Trigger the API call when apply filters is clicked
       const result = await getFilteredPosts(filterParams).unwrap();
       setFilteredPostsData(result);
+      setUsersData(result?.users || []);
     } catch (error) {
       console.error('Failed to fetch filtered posts:', error);
       setIsFiltered(false);
@@ -181,7 +210,7 @@ const Index = () => {
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Filters Sidebar */}
             <aside className="lg:w-80">
-              <div className="lg:sticky lg:top-24">
+              <div className="">
                 <FilterSidebar
                   filters={filters}
                   onFiltersChange={setFilters}
@@ -192,80 +221,120 @@ const Index = () => {
               </div>
             </aside>
 
-            {/* Feed */}
-            <main className="flex-1">
-              <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
-                    Latest Opportunities
-                  </h2>
-                  <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 text-sm text-white/80">
-                    <span>
-                      {filteredListings.length} {isFiltered ? 'filtered' : ''} listings found
-                    </span>
-                    {isFiltered && (
-                      <Badge variant="outline" className="text-white border-white/30">
-                        Filtered
-                      </Badge>
-                    )}
+            {/* Main Content Area */}
+            <div className="flex-1 flex flex-col lg:flex-row gap-8">
+              {/* Feed */}
+              <main className="flex-1">
+                <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
+                      Latest Opportunities
+                    </h2>
+                    <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 text-sm text-white/80">
+                      <span>
+                        {filteredListings.length} {isFiltered ? 'filtered' : ''} listings found
+                      </span>
+                      {isFiltered && (
+                        <Badge variant="outline" className="text-white border-white/30">
+                          Filtered
+                        </Badge>
+                      )}
+                    </div>
                   </div>
+
+                  <Button
+                    size="sm"
+                    className="bg-gradient-redwhiteblued hover:opacity-90 transition-opacity w-full sm:w-auto"
+                    onClick={() => {
+                      if (isAuthenticated) {
+                        navigate('/create-post');
+                      } else {
+                        navigate('/signin');
+                      }
+                    }}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Post Listing
+                  </Button>
                 </div>
 
-                <Button
-                  size="sm"
-                  className="bg-gradient-redwhiteblued hover:opacity-90 transition-opacity w-full sm:w-auto"
-                  onClick={() => {
-                    if (isAuthenticated) {
-                      navigate('/create-post');
-                    } else {
-                      navigate('/signin');
-                    }
-                  }}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Post Listing
-                </Button>
-              </div>
+                <div className="space-y-6">
+                  {(isLoading || isFilterLoading) ? (
+                    <Card className="p-6 sm:p-8 text-center bg-white/80">
+                      <CardContent>
+                        <Trophy className="h-12 w-12 mx-auto mb-4 text-muted-foreground animate-pulse" />
+                        <h3 className="text-lg font-semibold mb-2">Loading...</h3>
+                        <p className="text-muted-foreground">
+                          {isFiltered ? "Applying filters..." : "Loading opportunities..."}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ) : filteredListings.length > 0 ? (
+                    filteredListings.map((listing) => (
+                      <ListingCard
+                        key={listing._id}
+                        listing={listing}
+                        onContact={handleContact}
+                        onSave={handleSave}
+                      />
+                    ))
+                  ) : (
+                    <Card className="p-6 sm:p-8 text-center bg-white/80">
+                      <CardContent>
+                        <Trophy className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                        <h3 className="text-lg font-semibold mb-2">No listings found</h3>
+                        <p className="text-muted-foreground">
+                          {isFiltered
+                            ? "No posts match your current filters. Try adjusting your search criteria."
+                            : "Try adjusting your filters or check back later for new opportunities."
+                          }
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </main>
 
-              <div className="space-y-6">
-                {(isLoading || isFilterLoading) ? (
-                  <Card className="p-6 sm:p-8 text-center bg-white/80">
-                    <CardContent>
-                      <Trophy className="h-12 w-12 mx-auto mb-4 text-muted-foreground animate-pulse" />
-                      <h3 className="text-lg font-semibold mb-2">Loading...</h3>
-                      <p className="text-muted-foreground">
-                        {isFiltered ? "Applying filters..." : "Loading opportunities..."}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ) : filteredListings.length > 0 ? (
-                  filteredListings.map((listing) => (
-                    <ListingCard
-                      key={listing._id}
-                      listing={listing}
-                      onContact={handleContact}
-                      onSave={handleSave}
-                    />
-                  ))
-                ) : (
-                  <Card className="p-6 sm:p-8 text-center bg-white/80">
-                    <CardContent>
-                      <Trophy className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                      <h3 className="text-lg font-semibold mb-2">No listings found</h3>
-                      <p className="text-muted-foreground">
-                        {isFiltered
-                          ? "No posts match your current filters. Try adjusting your search criteria."
-                          : "Try adjusting your filters or check back later for new opportunities."
-                        }
-                      </p>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            </main>
+              {/* Users Section */}
+              {users.length > 0 && (
+                <aside className="lg:w-80">
+                  <div className="">
+                    <div className="mb-6">
+                      <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
+                        {isFiltered ? 'Matching Users' : 'Users'}
+                      </h2>
+                      <div className="flex items-center space-x-2 text-sm text-white/80">
+                        <span>{users.length} users found</span>
+                        {isFiltered && (
+                          <Badge variant="outline" className="text-white border-white/30">
+                            Filtered
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      {users.map((user) => (
+                        <UserCard
+                          key={user._id}
+                          user={user}
+                          onUserClick={handleUserClick}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </aside>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
+      {/* Profile Modal */}
+      <ProfileModal
+        user={selectedUser}
+        isOpen={isProfileModalOpen}
+        onClose={handleCloseProfileModal}
+      />
     </div>
   );
 };
