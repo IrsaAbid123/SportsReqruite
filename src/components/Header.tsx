@@ -126,7 +126,7 @@ export const Header = () => {
                   {user?.role === 'admin' && (
                     <DropdownMenuItem
                       className="cursor-pointer"
-                      onClick={() => navigate('/admin/dashboard')}
+                      onClick={() => navigate('/dashboard')}
                     >
                       <LayoutDashboard className="mr-2 h-4 w-4" />
                       Dashboard
