@@ -224,7 +224,16 @@ export default function ProfilePage() {
                                             <InputField label="Email" value={formData.email} onChange={(val) => handleInputChange("email", val)} />
                                             <InputField label="Location" value={formData.location} onChange={(val) => handleInputChange("location", val)} />
                                             <SelectField label="Age" options={ageRangeOptions} value={formData.age} onChange={(val) => handleInputChange("age", val)} />
-                                            <SelectField label="Role" options={["player", "team", "admin"]} value={formData.role} onChange={(val) => handleInputChange("role", val)} />
+                                            <SelectField
+                                                label="Role"
+                                                options={[
+                                                    { value: "player", label: "Player" },
+                                                    { value: "team", label: "Team" },
+                                                    { value: "admin", label: "Admin" }
+                                                ]}
+                                                value={formData.role}
+                                                onChange={(val) => handleInputChange("role", val)}
+                                            />
                                             <SelectField label="Position" options={positionOptions} value={formData.position} onChange={(val) => handleInputChange("position", val)} />
                                             <SelectField label="Experience Level" options={experienceLevelOptions} value={formData.experienceLevel} onChange={(val) => handleInputChange("experienceLevel", val)} />
                                         </div>
@@ -297,13 +306,24 @@ const InputField = ({ label, value, onChange }: { label: string, value: string, 
     </div>
 )
 
-const SelectField = ({ label, options, value, onChange }: { label: string, options: string[], value: string, onChange: (val: string) => void }) => (
+const SelectField = ({ label, options, value, onChange }: {
+    label: string,
+    options: string[] | { value: string, label: string }[],
+    value: string,
+    onChange: (val: string) => void
+}) => (
     <div className="space-y-2">
         <Label>{label}</Label>
         <Select value={value} onValueChange={onChange}>
             <SelectTrigger><SelectValue placeholder={`Select ${label}`} /></SelectTrigger>
             <SelectContent>
-                {options.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+                {options.map(opt => {
+                    if (typeof opt === 'string') {
+                        return <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                    } else {
+                        return <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    }
+                })}
             </SelectContent>
         </Select>
     </div>

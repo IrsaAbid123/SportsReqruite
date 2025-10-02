@@ -186,10 +186,7 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
               <Button
                 size="sm"
                 onClick={() => navigate("/chat")}
-                className={`w-full sm:w-auto ${listing.status === "available" && !isExpired
-                    ? "bg-gradient-redwhiteblued hover:opacity-90 transition-opacity"
-                    : ""
-                  }`}
+                className={`w-full sm:w-auto bg-gradient-redwhiteblued hover:opacity-90 transition-opacity`}
               >
                 {authorRole === "player" ? "Contact Player" : "Contact Team"}
               </Button>

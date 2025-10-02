@@ -28,7 +28,7 @@ interface FilterSidebarProps {
 }
 
 // predefined distance steps
-const distanceMarks = [5, 10, 20, 50, 100];
+const distanceMarks = [5, 25, 50, 70, 100];
 
 export const FilterSidebar = ({
   filters,
@@ -99,7 +99,7 @@ export const FilterSidebar = ({
         <div className="space-y-3">
           <Label className="text-sm font-medium">User Type</Label>
           <div className="flex flex-wrap gap-2">
-            {["all", UserRoleEnum.PLAYER, UserRoleEnum.COACH, UserRoleEnum.ADMIN].map((type) => (
+            {["all", UserRoleEnum.PLAYER, UserRoleEnum.COACH].map((type) => (
               <Badge
                 key={type}
                 variant={safeFilters.userType === type ? "default" : "outline"}
