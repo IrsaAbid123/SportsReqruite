@@ -15,8 +15,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import { SheetTrigger, Sheet } from "./ui/sheet";
 import { NotificationSheet } from "@/pages/Notification/NotificationsPage";
-import { mockNotifications } from "@/data/mockData";
 import { useUser } from "@/context/UserContext";
+import { useGetUserNotificationsQuery } from "@/redux/ApiCalls/notificationApi";
 
 export const Header = () => {
   const { user, setUser } = useUser();
@@ -26,6 +26,22 @@ export const Header = () => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const isAuthenticated = !!user;
+
+  // Get notifications for unread count
+  const { data: notificationsResponse } = useGetUserNotificationsQuery(user?._id, {
+    skip: !user?._id
+  });
+
+  // Safely extract notifications array and count unread
+  const notifications = Array.isArray(notificationsResponse)
+    ? notificationsResponse
+    : Array.isArray(notificationsResponse?.data)
+      ? notificationsResponse.data
+      : Array.isArray(notificationsResponse?.notifications)
+        ? notificationsResponse.notifications
+        : [];
+
+  const unreadCount = notifications.filter((notification: any) => !notification.read).length;
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -87,15 +103,17 @@ export const Header = () => {
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="icon" className="relative">
                     <Bell className="h-5 w-5" />
-                    <Badge
-                      variant="destructive"
-                      className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center"
-                    >
-                      3
-                    </Badge>
+                    {unreadCount > 0 && (
+                      <Badge
+                        variant="destructive"
+                        className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center"
+                      >
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </Badge>
+                    )}
                   </Button>
                 </SheetTrigger>
-                <NotificationSheet notifications={mockNotifications} />
+                <NotificationSheet />
               </Sheet>
 
               {/* User Menu */}
