@@ -19,18 +19,13 @@ import { ChatPage } from "./pages/Chat/ChatPage";
 import { useUser } from "./context/UserContext";
 import { UserForm } from "./pages/Dashboard/UserForm";
 import { PostForm } from "./pages/Dashboard/PostForm";
-import { AdminForm } from "./pages/Dashboard/AdminForm";
 import Dashboard from "./pages/Dashboard/index";
-import { usePendingContact } from "./hooks/usePendingContact";
 
 const queryClient = new QueryClient();
 
 const App = () => {
   const { user, setUser } = useUser();
   const isAuthenticated = !!user;
-
-  // Check for pending contacts when user returns
-  usePendingContact();
 
   const handleLogout = () => {
     setUser(null);
@@ -116,14 +111,6 @@ const App = () => {
                 element={
                   <ProtectedRoute isAuthenticated={isAuthenticated}>
                     <PostForm />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard/admins/:id"
-                element={
-                  <ProtectedRoute isAuthenticated={isAuthenticated}>
-                    <AdminForm />
                   </ProtectedRoute>
                 }
               />

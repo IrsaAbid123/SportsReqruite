@@ -10,9 +10,6 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Check, ChevronsUpDown } from "lucide-react"
 import { FaLocationDot } from "react-icons/fa6"
 import { MdEdit } from "react-icons/md"
 import { HiDotsVertical } from "react-icons/hi"
@@ -59,7 +56,6 @@ export default function ProfilePage() {
     const [unfollowUser] = useUnfollowUserMutation()
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-    const [positionSelectOpen, setPositionSelectOpen] = useState(false)
     const [formData, setFormData] = useState({
         fullname: "",
         email: "",
@@ -67,7 +63,6 @@ export default function ProfilePage() {
         age: "",
         experienceLevel: "",
         position: "",
-        positions: [] as string[],
         role: "",
         bio: "",
     })
@@ -83,7 +78,6 @@ export default function ProfilePage() {
                 age: profileUser.age || "",
                 experienceLevel: profileUser.experienceLevel || "",
                 position: profileUser.position || "",
-                positions: profileUser.position ? profileUser.position.split(", ") : [],
                 role: profileUser.role || "",
                 bio: profileUser.bio || "",
             })
@@ -104,11 +98,7 @@ export default function ProfilePage() {
 
     const handleSaveProfile = async () => {
         try {
-            const payload = {
-                ...formData,
-                position: formData.positions.join(", ")
-            }
-            await updateUser({ id: user?._id!, data: payload }).unwrap()
+            await updateUser({ id: user?._id!, data: formData }).unwrap()
             toast.success("Profile updated successfully")
             setIsEditModalOpen(false)
         } catch (error) {
@@ -244,59 +234,7 @@ export default function ProfilePage() {
                                                 value={formData.role}
                                                 onChange={(val) => handleInputChange("role", val)}
                                             />
-                                            <div className="space-y-3">
-                                                <Label htmlFor="positions">Position(s)</Label>
-                                                <Popover open={positionSelectOpen} onOpenChange={setPositionSelectOpen}>
-                                                    <PopoverTrigger asChild>
-                                                        <Button
-                                                            variant="outline"
-                                                            role="combobox"
-                                                            aria-expanded={positionSelectOpen}
-                                                            className="w-full justify-between"
-                                                        >
-                                                            {formData.positions.length > 0
-                                                                ? `${formData.positions.length} position(s) selected`
-                                                                : "Select positions..."}
-                                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                        </Button>
-                                                    </PopoverTrigger>
-                                                    <PopoverContent className="w-full p-0">
-                                                        <Command>
-                                                            <CommandInput placeholder="Search positions..." />
-                                                            <CommandList>
-                                                                <CommandEmpty>No positions found.</CommandEmpty>
-                                                                <CommandGroup>
-                                                                    {positionOptions.map((position) => (
-                                                                        <CommandItem
-                                                                            key={position}
-                                                                            value={position}
-                                                                            onSelect={() => {
-                                                                                if (formData.positions.includes(position)) {
-                                                                                    setFormData({
-                                                                                        ...formData,
-                                                                                        positions: formData.positions.filter(p => p !== position)
-                                                                                    });
-                                                                                } else {
-                                                                                    setFormData({
-                                                                                        ...formData,
-                                                                                        positions: [...formData.positions, position]
-                                                                                    });
-                                                                                }
-                                                                            }}
-                                                                        >
-                                                                            <Check
-                                                                                className={`mr-2 h-4 w-4 ${formData.positions.includes(position) ? "opacity-100" : "opacity-0"
-                                                                                    }`}
-                                                                            />
-                                                                            {position}
-                                                                        </CommandItem>
-                                                                    ))}
-                                                                </CommandGroup>
-                                                            </CommandList>
-                                                        </Command>
-                                                    </PopoverContent>
-                                                </Popover>
-                                            </div>
+                                            <SelectField label="Position" options={positionOptions} value={formData.position} onChange={(val) => handleInputChange("position", val)} />
                                             <SelectField label="Experience Level" options={experienceLevelOptions} value={formData.experienceLevel} onChange={(val) => handleInputChange("experienceLevel", val)} />
                                         </div>
                                         <div className="space-y-2">

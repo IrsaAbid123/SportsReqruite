@@ -6,9 +6,6 @@ import { ShareCard } from "@/pages/PostCreation/ShareCard";
 import { Calendar, MapPin, Clock, Star, Users, Share2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSendNotificationMutation } from "@/redux/ApiCalls/notificationApi";
-import { useUser } from "@/context/UserContext";
-import { toast } from "sonner";
 
 export interface Listing {
   _id: string;
@@ -21,7 +18,6 @@ export interface Listing {
     avatar?: string;
     experienceLevel: string;
     location: string;
-    email?: string;
   } | null;
   status: 'available' | 'filled';
   expiryDate: string;
@@ -43,9 +39,7 @@ interface ListingCardProps {
 
 export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) => {
   const navigate = useNavigate()
-  const { user } = useUser()
   const [shareOpen, setShareOpen] = useState(false);
-  const [sendNotification, { isLoading: isSendingNotification }] = useSendNotificationMutation()
   const shareUrl = `${window.location.origin}/listing/${listing._id}`;
   const isExpired = new Date(listing.expiryDate) < new Date();
   const timeAgo = new Date(listing.createdAt).toLocaleDateString();
@@ -55,48 +49,6 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
   const authorRole = listing.author?.role || 'player';
   const authorExperience = listing.author?.experienceLevel || 'Unknown';
   const authorLocation = listing.author?.location || 'Unknown Location';
-
-  const handleContact = () => {
-    if (!user) {
-      toast.error("Please log in to contact users");
-      navigate("/auth");
-      return;
-    }
-
-    if (!listing.author?._id) {
-      toast.error("Unable to contact this user");
-      return;
-    }
-
-    if (user._id === listing.author._id) {
-      toast.error("You cannot contact yourself");
-      return;
-    }
-
-    // Store contact info in localStorage for when user returns
-    const contactInfo = {
-      targetUserId: listing.author._id,
-      targetUserName: authorName,
-      postTitle: listing.title,
-      contactTime: new Date().toISOString()
-    };
-
-    localStorage.setItem('pendingContact', JSON.stringify(contactInfo));
-
-    // Navigate to email with the user's email
-    const emailSubject = encodeURIComponent(`Interested in your post: ${listing.title}`);
-    const emailBody = encodeURIComponent(`Hi ${authorName},\n\nI'm interested in your post: "${listing.title}"\n\nBest regards,\n${user.fullname}`);
-
-    // Try to get email from listing author, fallback to a generic message
-    const emailAddress = listing.author.email || 'contact@sportsrecruit.com';
-    const mailtoLink = `mailto:${emailAddress}?subject=${emailSubject}&body=${emailBody}`;
-
-    // Open email client
-    window.open(mailtoLink, '_blank');
-
-    // Call the original onContact callback if provided
-    onContact?.(listing._id);
-  };
 
   return (
     <Card className="w-full  shadow-card hover:shadow-elevated transition-all duration-300 border-border/50">
@@ -233,7 +185,7 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
               </Button>
               <Button
                 size="sm"
-                onClick={handleContact}
+                onClick={() => navigate("/chat")}
                 className={`w-full sm:w-auto bg-gradient-redwhiteblued hover:opacity-90 transition-opacity`}
               >
                 {authorRole === "player" ? "Contact Player" : "Contact Team"}
