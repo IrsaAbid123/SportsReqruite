@@ -3,7 +3,7 @@ import { Header } from "@/components/Header";
 import { ListingCard } from "@/components/ListingCard";
 import { UserCard } from "@/components/UserCard";
 import { ProfileModal } from "@/components/ProfileModal";
-import { FilterSidebar, FilterOptions } from "@/components/FilterSidebar";
+import { FilterDropdown, FilterOptions } from "@/components/FilterDropdown";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -208,19 +208,6 @@ const Index = () => {
         {/* Actual Content */}
         <div className="relative container px-4 sm:px-8 lg:px-16 py-8">
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* Filters Sidebar */}
-            <aside className="lg:w-80">
-              <div className="">
-                <FilterSidebar
-                  filters={filters}
-                  onFiltersChange={setFilters}
-                  onClearFilters={clearFilters}
-                  onApplyFilters={applyFilters}
-                  isFiltered={isFiltered}
-                />
-              </div>
-            </aside>
-
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col lg:flex-row gap-8">
               {/* Feed */}
@@ -242,19 +229,28 @@ const Index = () => {
                     </div>
                   </div>
 
-                  <Button
-                    size="sm"
-                    className="bg-gradient-redwhiteblued hover:opacity-90 transition-opacity w-full sm:w-auto"
-                    onClick={() => {
-                      if (isAuthenticated) {
-                        navigate('/create-post');
-                      } else {
-                        navigate('/signin');
-                      }
-                    }}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Post Listing
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    <FilterDropdown
+                      filters={filters}
+                      onFiltersChange={setFilters}
+                      onClearFilters={clearFilters}
+                      onApplyFilters={applyFilters}
+                      isFiltered={isFiltered}
+                    />
+                    <Button
+                      size="sm"
+                      className="bg-gradient-redwhiteblued hover:opacity-90 transition-opacity w-full sm:w-auto"
+                      onClick={() => {
+                        if (isAuthenticated) {
+                          navigate('/create-post');
+                        } else {
+                          navigate('/signin');
+                        }
+                      }}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Post Listing
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="space-y-6">
