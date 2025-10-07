@@ -203,13 +203,20 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="register-lastname">Second Name</Label>
+                      <Label htmlFor="register-lastname">Second Name Initial</Label>
                       <Input
                         id="register-lastname"
                         type="text"
-                        placeholder="Doe"
+                        placeholder="D"
                         value={registerData.lastName}
-                        onChange={(e) => setRegisterData({ ...registerData, lastName: e.target.value })}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          // Only allow single letter and convert to uppercase
+                          if (value.length <= 1 && /^[A-Za-z]*$/.test(value)) {
+                            setRegisterData({ ...registerData, lastName: value.toUpperCase() });
+                          }
+                        }}
+                        maxLength={1}
                         required
                       />
                     </div>
