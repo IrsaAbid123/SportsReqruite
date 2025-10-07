@@ -123,7 +123,7 @@ export default function ProfilePage() {
                 profileUser.followers.push(user._id)
             }
         } catch (error) {
-            toast.error("Action failed")
+            // toast.error("Action failed")
             console.error("Follow/Unfollow error:", error)
         }
     }

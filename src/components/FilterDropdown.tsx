@@ -133,17 +133,27 @@ export const FilterDropdown = ({
                 <div className="p-4">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-semibold">Filters</h3>
-                        {hasActiveFilters && (
+                        <div className="flex items-center gap-2">
+                            {hasActiveFilters && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={handleClearFilters}
+                                    className="text-xs text-muted-foreground hover:text-foreground"
+                                >
+                                    {/* <X c lassName="h-3 w-3 mr-1" /> */}
+                                    Clear
+                                </Button>
+                            )}
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={handleClearFilters}
-                                className="text-xs text-muted-foreground hover:text-foreground"
+                                onClick={() => setOpen(false)}
+                                className="text-muted-foreground hover:text-foreground p-1 h-6 w-6"
                             >
-                                <X className="h-3 w-3 mr-1" />
-                                Clear
+                                <X className="h-4 w-4" />
                             </Button>
-                        )}
+                        </div>
                     </div>
 
                     <div className="space-y-6">
