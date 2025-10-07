@@ -11,6 +11,7 @@ export default function Dashboard() {
     const [activeTab, setActiveTab] = useState("dashboard");
     const { user } = useUser();
     const isAdmin = user?.role === 'admin' || user?.role === 'super-admin';
+    const isSuperAdmin = user?.role === 'super-admin';
 
     const renderContent = () => {
         switch (activeTab) {
@@ -45,13 +46,13 @@ export default function Dashboard() {
                 }
                 return <AdminTable setActiveTab={setActiveTab} />;
             case "admin-form":
-                if (!isAdmin) {
+                if (!isSuperAdmin) {
                     return (
                         <div className="space-y-4 sm:space-y-6">
                             <div>
                                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Access Denied</h1>
                                 <p className="text-muted-foreground text-sm sm:text-base">
-                                    You don't have permission to access admin management.
+                                    Only super administrators can register new admins.
                                 </p>
                             </div>
                         </div>

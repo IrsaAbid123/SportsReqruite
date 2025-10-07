@@ -15,6 +15,7 @@ import {
 import { Filter, X } from "lucide-react";
 import { ageRangeOptions, experienceLevelOptions, positionOptions } from "@/constants/UserDataEnums";
 import { UserRoleEnum } from "@/constants/UserRoleEnums";
+import { useState } from "react";
 
 export interface FilterOptions {
     userType: "all" | "player" | "coach" | "admin";
@@ -44,6 +45,8 @@ export const FilterDropdown = ({
     onApplyFilters,
     isFiltered = false,
 }: FilterDropdownProps) => {
+    const [open, setOpen] = useState(false);
+
     // ✅ fallback arrays to avoid includes on undefined
     const safeFilters: FilterOptions = {
         ...filters,
@@ -79,8 +82,20 @@ export const FilterDropdown = ({
         safeFilters.position.length > 0 ||
         safeFilters.zipOrCityState !== "";
 
+    const handleClearFilters = () => {
+        onClearFilters();
+        setOpen(false);
+    };
+
+    const handleApplyFilters = () => {
+        if (onApplyFilters) {
+            onApplyFilters();
+        }
+        setOpen(false);
+    };
+
     return (
-        <DropdownMenu>
+        <DropdownMenu open={open} onOpenChange={setOpen}>
             <DropdownMenuTrigger asChild>
                 <Button
                     variant="outline"
@@ -122,7 +137,7 @@ export const FilterDropdown = ({
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={onClearFilters}
+                                onClick={handleClearFilters}
                                 className="text-xs text-muted-foreground hover:text-foreground"
                             >
                                 <X className="h-3 w-3 mr-1" />
@@ -281,7 +296,7 @@ export const FilterDropdown = ({
                         {onApplyFilters && (
                             <div className="pt-4 border-t">
                                 <Button
-                                    onClick={onApplyFilters}
+                                    onClick={handleApplyFilters}
                                     className={`w-full transition-opacity ${isFiltered
                                         ? "bg-green-600 hover:bg-green-700"
                                         : "bg-primary hover:opacity-90"

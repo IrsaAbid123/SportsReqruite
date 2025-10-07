@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Eye, Edit, Trash2, UserPlus } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import { useGetAdminsQuery, useDeleteAdminMutation } from "@/redux/ApiCalls/authApi"
+import { useGetUsersQuery, useDeleteUserMutation } from "@/redux/ApiCalls/userApi"
 import { ReusableDataTable } from "./ReuseableDataTable"
 import { useState } from "react"
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog"
@@ -27,7 +27,7 @@ export type Admin = {
 }
 
 // Define columns for admins
-export const createAdminColumns = (): ColumnDef<Admin>[] => [
+export const createAdminColumns = (isSuperAdmin: boolean = false): ColumnDef<Admin>[] => [
     {
         accessorKey: "fullname",
         header: "Name",
@@ -86,7 +86,7 @@ export const createAdminColumns = (): ColumnDef<Admin>[] => [
         cell: ({ row }) => {
             const admin = row.original
             const navigate = useNavigate()
-            const [deleteAdmin, { isLoading: isDeleting }] = useDeleteAdminMutation()
+            const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation()
             const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
             const handleView = () => {
@@ -99,7 +99,7 @@ export const createAdminColumns = (): ColumnDef<Admin>[] => [
 
             const handleDelete = async () => {
                 try {
-                    await deleteAdmin(admin._id).unwrap()
+                    await deleteUser(admin._id).unwrap()
                     toast.success("Admin removed successfully")
                     setShowDeleteDialog(false)
                 } catch (error) {
@@ -154,7 +154,7 @@ interface AdminTableProps {
 }
 
 export function AdminTable({ setActiveTab }: AdminTableProps) {
-    const { data, isLoading, isError } = useGetAdminsQuery()
+    const { data, isLoading, isError } = useGetUsersQuery()
 
     if (isLoading) return (
         <div className="space-y-4 sm:space-y-6">
@@ -204,7 +204,7 @@ export function AdminTable({ setActiveTab }: AdminTableProps) {
             <div className="rounded-lg border bg-card overflow-hidden">
                 <ReusableDataTable
                     columns={createAdminColumns()}
-                    data={data?.users || []}
+                    data={data?.users?.filter((user: any) => user.role === 'admin' || user.role === 'super-admin') || []}
                     searchKey="fullname"
                     searchPlaceholder="Search admins..."
                 />
