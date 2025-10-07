@@ -86,8 +86,8 @@ export const FilterDropdown = ({
                     variant="outline"
                     size="sm"
                     className={`relative transition-all ${hasActiveFilters
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-white/20 hover:bg-white/30 text-white border-white/30"
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-white/20 hover:bg-white/30 text-white border-white/30"
                         }`}
                 >
                     <Filter className="h-4 w-4 mr-2" />
@@ -111,7 +111,7 @@ export const FilterDropdown = ({
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-                className="w-80 max-h-[80vh] overflow-y-auto"
+                className="w-80 max-h-[50vh] overflow-y-auto"
                 align="end"
                 sideOffset={8}
             >

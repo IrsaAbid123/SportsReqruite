@@ -41,18 +41,10 @@ export default function ProfilePage() {
     // Profile user id (view own if id not present)
     const profileUserId = id || user?._id
 
-    // Queries
-    const { data: profileData, isLoading: profileLoading, error: profileError } = useGetProfileQuery(profileUserId!, {
+    // Queries - Use profile endpoint for both own and other profiles to get posts
+    const { data, isLoading, error } = useGetProfileQuery(profileUserId!, {
         skip: !profileUserId
     })
-
-    const { data: userData, isLoading: userLoading, error: userError } = useGetUserQuery(profileUserId!, {
-        skip: !profileUserId || !id
-    })
-
-    const data = id ? userData : profileData
-    const isLoading = id ? userLoading : profileLoading
-    const error = id ? userError : profileError
 
     const [updateUser] = useUpdateUserMutation()
     const [followUser] = useFollowUserMutation()
@@ -94,7 +86,7 @@ export default function ProfilePage() {
     if (error) return <div>Error loading profile</div>
 
     const profileUser = data?.user || data
-    const listings = id ? [] : (data?.post || [])
+    const listings = data?.post || []
     const isOwnProfile = user?._id === profileUserId
     const isFollowing = profileUser?.followers?.includes(user?._id)
 
@@ -160,7 +152,7 @@ export default function ProfilePage() {
                     </Avatar>
                 </div>
 
-                <div className="flex flex-col sm:flex-row w-full justify-between items-start gap-4">
+                <div className="flex flex-col w-full gap-4">
                     <div className="flex-1">
                         {/* Name */}
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
@@ -205,9 +197,23 @@ export default function ProfilePage() {
                             </span>
                         </div>
                     </div>
+                </div>
+            </section>
+
+            {/* Profile Posts */}
+            <div className="container flex flex-col lg:flex-row px-4 sm:px-8 lg:px-32 py-6 sm:py-10 gap-6 lg:gap-10">
+                <div className="p-4 sm:p-6">
+                    <div className="space-y-3 mb-5">
+                        <div className="flex items-center text-sm">
+                            <svg className="w-4 h-4 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                            </svg>
+                            <a href={`mailto:${profileUser?.email}`} className="text-gray-400 hover:underline break-all">{profileUser?.email}</a>
+                        </div>
+                    </div>
 
                     {/* Edit or Follow Button */}
-                    <div className="">
+                    <div className="mt-4">
                         {isOwnProfile ? (
                             <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
                                 <DropdownMenu>
@@ -318,20 +324,6 @@ export default function ProfilePage() {
                                 {isFollowing ? "Unfollow" : "Follow"}
                             </Button>
                         )}
-                    </div>
-                </div>
-            </section>
-
-            {/* Profile Posts */}
-            <div className="container flex flex-col lg:flex-row px-4 sm:px-8 lg:px-32 py-6 sm:py-10 gap-6 lg:gap-10">
-                <div className="p-4 sm:p-6">
-                    <div className="space-y-3 mb-5">
-                        <div className="flex items-center text-sm">
-                            <svg className="w-4 h-4 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
-                            </svg>
-                            <a href={`mailto:${profileUser?.email}`} className="text-gray-400 hover:underline break-all">{profileUser?.email}</a>
-                        </div>
                     </div>
                 </div>
 
