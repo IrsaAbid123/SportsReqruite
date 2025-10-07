@@ -58,6 +58,52 @@ export const postApi = createApi({
                 "Post"
             ],
         }),
+        // Like/Unlike endpoints - using separate likes API
+        likePost: builder.mutation<any, { postId: string; userId: string }>({
+            query: ({ postId, userId }) => ({
+                url: `https://sports-backend-production-e82f.up.railway.app/api/likes/${postId}/like`,
+                method: "POST",
+                body: { userId },
+            }),
+            invalidatesTags: (result, error, { postId }) => [
+                { type: "Post", id: postId },
+                "Post"
+            ],
+        }),
+        unlikePost: builder.mutation<any, { postId: string; userId: string }>({
+            query: ({ postId, userId }) => ({
+                url: `https://sports-backend-production-e82f.up.railway.app/api/likes/${postId}/unlike`,
+                method: "POST",
+                body: { userId },
+            }),
+            invalidatesTags: (result, error, { postId }) => [
+                { type: "Post", id: postId },
+                "Post"
+            ],
+        }),
+        // Comment endpoints - using separate comments API
+        addComment: builder.mutation<any, { postId: string; userId: string; commentText: string }>({
+            query: ({ postId, userId, commentText }) => ({
+                url: `https://sports-backend-production-e82f.up.railway.app/api/comments/${postId}/comment`,
+                method: "POST",
+                body: { userId, commentText },
+            }),
+            invalidatesTags: (result, error, { postId }) => [
+                { type: "Post", id: postId },
+                "Post"
+            ],
+        }),
+        deleteComment: builder.mutation<any, { postId: string; commentId: string; userId: string }>({
+            query: ({ postId, commentId, userId }) => ({
+                url: `https://sports-backend-production-e82f.up.railway.app/api/comments/${postId}/comment/${commentId}`,
+                method: "DELETE",
+                body: { userId },
+            }),
+            invalidatesTags: (result, error, { postId }) => [
+                { type: "Post", id: postId },
+                "Post"
+            ],
+        }),
     }),
 });
 
@@ -67,5 +113,9 @@ export const {
     useGetPostQuery,
     useDeletePostMutation,
     useUpdatePostMutation,
-    useCreatePostMutation
+    useCreatePostMutation,
+    useLikePostMutation,
+    useUnlikePostMutation,
+    useAddCommentMutation,
+    useDeleteCommentMutation
 } = postApi;

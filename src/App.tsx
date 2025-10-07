@@ -21,6 +21,7 @@ import { UserForm } from "./pages/Dashboard/UserForm";
 import { PostForm } from "./pages/Dashboard/PostForm";
 import { AdminForm } from "./pages/Dashboard/AdminForm";
 import Dashboard from "./pages/Dashboard/index";
+import { PostDetail } from "./pages/PostDetail/PostDetail";
 import { usePendingContact } from "./hooks/usePendingContact";
 
 const queryClient = new QueryClient();
@@ -59,6 +60,7 @@ const App = () => {
             <Route path="/verify-otp" element={<VerifyOtp />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/" element={<Index />} />
+            <Route path="/listing/:id" element={<PostDetail />} />
             {/* <Route path="/chat" element={<ChatPage />} /> */}
 
             {/* Protected Routes */}

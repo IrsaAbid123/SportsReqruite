@@ -3,10 +3,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ShareCard } from "@/pages/PostCreation/ShareCard";
-import { Calendar, MapPin, Clock, Star, Users, Share2 } from "lucide-react";
+import { Calendar, MapPin, Clock, Star, Users, Share2, Heart, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSendNotificationMutation } from "@/redux/ApiCalls/notificationApi";
+import { useLikePostMutation, useUnlikePostMutation } from "@/redux/ApiCalls/postApi";
 import { useUser } from "@/context/UserContext";
 import { toast } from "sonner";
 
@@ -33,6 +34,20 @@ export interface Listing {
     experience?: string;
     position?: string;
   };
+  // Backend schema fields
+  likes?: Array<{
+    userId: string;
+    userFullname: string;
+  }>;
+  totalLikes?: number;
+  comments?: Array<{
+    _id: string;
+    userId: string;
+    userFullname: string;
+    commentText: string;
+    createdAt: string;
+  }>;
+  totalComments?: number;
 }
 
 interface ListingCardProps {
@@ -46,6 +61,17 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
   const { user } = useUser()
   const [shareOpen, setShareOpen] = useState(false);
   const [sendNotification, { isLoading: isSendingNotification }] = useSendNotificationMutation()
+  const [likePost, { isLoading: isLiking }] = useLikePostMutation()
+  const [unlikePost, { isLoading: isUnliking }] = useUnlikePostMutation()
+
+  // Local state for optimistic updates
+  const [localIsLiked, setLocalIsLiked] = useState(
+    user ? listing.likes?.some((like: any) => like.userId === user._id) || false : false
+  );
+  const [localLikesCount, setLocalLikesCount] = useState(listing.totalLikes || 0);
+
+  const commentsCount = listing.totalComments || 0;
+
   const shareUrl = `${window.location.origin}/listing/${listing._id}`;
   const isExpired = new Date(listing.expiryDate) < new Date();
   const timeAgo = new Date(listing.createdAt).toLocaleDateString();
@@ -96,6 +122,42 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
 
     // Call the original onContact callback if provided
     onContact?.(listing._id);
+  };
+
+  const handleLike = async () => {
+    if (!user) {
+      toast.error("Please log in to like posts");
+      navigate("/signin");
+      return;
+    }
+
+    // Optimistic update
+    const wasLiked = localIsLiked;
+    setLocalIsLiked(!wasLiked);
+    setLocalLikesCount(prev => wasLiked ? prev - 1 : prev + 1);
+
+    try {
+      if (wasLiked) {
+        await unlikePost({ postId: listing._id, userId: user._id }).unwrap();
+        toast.success("Post unliked");
+      } else {
+        await likePost({ postId: listing._id, userId: user._id }).unwrap();
+        toast.success("Post liked");
+      }
+    } catch (error) {
+      // Revert optimistic update on error
+      setLocalIsLiked(wasLiked);
+      setLocalLikesCount(prev => wasLiked ? prev + 1 : prev - 1);
+      toast.error("Failed to update like status");
+      console.error("Like error:", error);
+    }
+  };
+
+  const handleCommentClick = () => {
+    // Pass the post data as state when navigating
+    navigate(`/listing/${listing._id}`, {
+      state: { post: listing }
+    });
   };
 
   return (
@@ -208,6 +270,27 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
                 Expired
               </Badge>
             )}
+          </div>
+
+          {/* Like and Comment Icons */}
+          <div className="flex items-center space-x-4 pt-2">
+            <button
+              onClick={handleLike}
+              disabled={isLiking || isUnliking}
+              className="flex items-center space-x-1 text-muted-foreground hover:text-red-500 transition-colors disabled:opacity-50"
+            >
+              <Heart
+                className={`h-4 w-4 ${localIsLiked ? 'fill-red-500 text-red-500' : ''}`}
+              />
+              <span className="text-sm">{localLikesCount}</span>
+            </button>
+            <button
+              onClick={handleCommentClick}
+              className="flex items-center space-x-1 text-muted-foreground hover:text-blue-500 transition-colors"
+            >
+              <MessageCircle className="h-4 w-4" />
+              <span className="text-sm">{commentsCount}</span>
+            </button>
           </div>
 
           {/* Actions */}
