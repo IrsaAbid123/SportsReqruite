@@ -3,13 +3,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ShareCard } from "@/pages/PostCreation/ShareCard";
-import { Calendar, MapPin, Clock, Star, Users, Share2, Heart, MessageCircle } from "lucide-react";
+import { Calendar, MapPin, Clock, Star, Users, Share2, Heart, MessageCircle, Edit, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSendNotificationMutation } from "@/redux/ApiCalls/notificationApi";
-import { useLikePostMutation, useUnlikePostMutation } from "@/redux/ApiCalls/postApi";
+import { useLikePostMutation, useUnlikePostMutation, useDeletePostMutation, useGetPostQuery } from "@/redux/ApiCalls/postApi";
 import { useUser } from "@/context/UserContext";
 import { toast } from "sonner";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export interface Listing {
   _id: string;
@@ -60,9 +61,11 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
   const navigate = useNavigate()
   const { user } = useUser()
   const [shareOpen, setShareOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [sendNotification, { isLoading: isSendingNotification }] = useSendNotificationMutation()
   const [likePost, { isLoading: isLiking }] = useLikePostMutation()
   const [unlikePost, { isLoading: isUnliking }] = useUnlikePostMutation()
+  const [deletePost, { isLoading: isDeleting }] = useDeletePostMutation()
 
   // Local state for optimistic updates
   const [localIsLiked, setLocalIsLiked] = useState(
@@ -159,6 +162,32 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
       state: { post: listing }
     });
   };
+
+  const handleEditPost = () => {
+    // Navigate to create post page with edit mode
+    navigate('/create-post', {
+      state: {
+        editMode: true,
+        postId: listing._id,
+        postData: listing,
+        returnTo: window.location.pathname // Pass current page as return path
+      }
+    });
+  };
+
+  const handleDeletePost = async () => {
+    try {
+      await deletePost(listing._id).unwrap();
+      toast.success("Post deleted successfully");
+      setDeleteDialogOpen(false);
+    } catch (error) {
+      toast.error("Failed to delete post");
+      console.error("Delete error:", error);
+    }
+  };
+
+  // Check if current user is the author of the post
+  const isPostAuthor = user?._id === listing.author?._id;
 
   return (
     <Card className="w-full  shadow-card hover:shadow-elevated transition-all duration-300 border-border/50">
@@ -305,6 +334,30 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
             </Button>
 
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              {/* Edit and Delete buttons for post author */}
+              {isPostAuthor && (
+                <>
+                  <Button
+                    size="sm"
+                    onClick={handleEditPost}
+                    variant="outline"
+                    className="flex items-center justify-center gap-1 w-full sm:w-auto"
+                  >
+                    <Edit className="h-4 w-4" />
+                    Edit
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => setDeleteDialogOpen(true)}
+                    variant="destructive"
+                    className="flex items-center justify-center gap-1 w-full sm:w-auto"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </Button>
+                </>
+              )}
+
               <Button
                 size="sm"
                 onClick={() => setShareOpen(true)}
@@ -314,19 +367,43 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
                 <Share2 className="h-4 w-4" />
                 Share
               </Button>
-              <Button
-                size="sm"
-                onClick={handleContact}
-                className={`w-full sm:w-auto bg-gradient-redwhiteblued hover:opacity-90 transition-opacity`}
-              >
-                {authorRole === "player" ? "Contact Player" : "Contact Team"}
-              </Button>
+              {!isPostAuthor && (
+                <Button
+                  size="sm"
+                  onClick={handleContact}
+                  className={`w-full sm:w-auto bg-gradient-redwhiteblued hover:opacity-90 transition-opacity`}
+                >
+                  {authorRole === "player" ? "Contact Player" : "Contact Team"}
+                </Button>
+              )}
             </div>
           </div>
 
           <ShareCard open={shareOpen} onOpenChange={setShareOpen} url={shareUrl} />
         </div>
       </CardContent>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Post</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this post? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeletePost}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };

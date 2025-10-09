@@ -154,10 +154,28 @@ export default function ProfilePage() {
 
                 <div className="flex flex-col w-full gap-4">
                     <div className="flex-1">
-                        {/* Name */}
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-                            <p className="text-lg sm:text-xl font-bold">{profileUser?.fullname}</p>
-                            {profileUser?.verified && <Badge variant="default" className="bg-green-500 w-fit">Verified</Badge>}
+                        {/* Name and Edit Button */}
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 mb-2">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                                <p className="text-lg sm:text-xl font-bold">{profileUser?.fullname}</p>
+                                {profileUser?.verified && <Badge variant="default" className="bg-green-500 w-fit">Verified</Badge>}
+                            </div>
+
+                            {/* Edit Button - Only show for own profile */}
+                            {isOwnProfile && (
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-10 w-10 p-2">
+                                            <HiDotsVertical className="h-5 w-5" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent className="w-40" align="end" forceMount>
+                                        <DropdownMenuItem onClick={() => setIsEditModalOpen(true)}>
+                                            <MdEdit className="mr-2 h-4 w-4" /> Edit Profile
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            )}
                         </div>
 
                         {/* Role/Position */}
@@ -212,119 +230,17 @@ export default function ProfilePage() {
                         </div>
                     </div>
 
-                    {/* Edit or Follow Button */}
-                    <div className="mt-4">
-                        {isOwnProfile ? (
-                            <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="h-10 w-10 p-2">
-                                            <HiDotsVertical className="h-5 w-5" />
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent className="w-40" align="end" forceMount>
-                                        <DropdownMenuItem onClick={() => setIsEditModalOpen(true)}>
-                                            <MdEdit className="mr-2 h-4 w-4" /> Edit Profile
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-
-                                {/* Edit Modal */}
-                                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                                    <DialogHeader>
-                                        <DialogTitle>Edit Profile</DialogTitle>
-                                    </DialogHeader>
-                                    <div className="space-y-4">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <InputField label="Full Name" value={formData.fullname} onChange={(val) => handleInputChange("fullname", val)} />
-                                            <InputField label="Email" value={formData.email} onChange={(val) => handleInputChange("email", val)} />
-                                            <InputField label="Location" value={formData.location} onChange={(val) => handleInputChange("location", val)} />
-                                            <SelectField label="Age" options={ageRangeOptions} value={formData.age} onChange={(val) => handleInputChange("age", val)} />
-                                            <SelectField
-                                                label="Role"
-                                                options={[
-                                                    { value: "player", label: "Player" },
-                                                    { value: "team", label: "Team" },
-                                                    { value: "admin", label: "Admin" }
-                                                ]}
-                                                value={formData.role}
-                                                onChange={(val) => handleInputChange("role", val)}
-                                            />
-                                            <div className="space-y-3">
-                                                <Label htmlFor="positions">Position(s)</Label>
-                                                <Popover open={positionSelectOpen} onOpenChange={setPositionSelectOpen}>
-                                                    <PopoverTrigger asChild>
-                                                        <Button
-                                                            variant="outline"
-                                                            role="combobox"
-                                                            aria-expanded={positionSelectOpen}
-                                                            className="w-full justify-between"
-                                                        >
-                                                            {formData.positions.length > 0
-                                                                ? `${formData.positions.length} position(s) selected`
-                                                                : "Select positions..."}
-                                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                        </Button>
-                                                    </PopoverTrigger>
-                                                    <PopoverContent className="w-full p-0">
-                                                        <Command>
-                                                            <CommandInput placeholder="Search positions..." />
-                                                            <CommandList>
-                                                                <CommandEmpty>No positions found.</CommandEmpty>
-                                                                <CommandGroup>
-                                                                    {positionOptions.map((position) => (
-                                                                        <CommandItem
-                                                                            key={position}
-                                                                            value={position}
-                                                                            onSelect={() => {
-                                                                                if (formData.positions.includes(position)) {
-                                                                                    setFormData({
-                                                                                        ...formData,
-                                                                                        positions: formData.positions.filter(p => p !== position)
-                                                                                    });
-                                                                                } else {
-                                                                                    setFormData({
-                                                                                        ...formData,
-                                                                                        positions: [...formData.positions, position]
-                                                                                    });
-                                                                                }
-                                                                            }}
-                                                                        >
-                                                                            <Check
-                                                                                className={`mr-2 h-4 w-4 ${formData.positions.includes(position) ? "opacity-100" : "opacity-0"
-                                                                                    }`}
-                                                                            />
-                                                                            {position}
-                                                                        </CommandItem>
-                                                                    ))}
-                                                                </CommandGroup>
-                                                            </CommandList>
-                                                        </Command>
-                                                    </PopoverContent>
-                                                </Popover>
-                                            </div>
-                                            <SelectField label="Experience Level" options={experienceLevelOptions} value={formData.experienceLevel} onChange={(val) => handleInputChange("experienceLevel", val)} />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="bio">Bio</Label>
-                                            <Textarea id="bio" value={formData.bio} onChange={(e) => handleInputChange("bio", e.target.value)} rows={4} />
-                                        </div>
-                                        <div className="flex justify-end space-x-2 pt-4">
-                                            <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>Cancel</Button>
-                                            <Button onClick={handleSaveProfile} className="bg-gradient-redwhiteblued">Save Changes</Button>
-                                        </div>
-                                    </div>
-                                </DialogContent>
-                            </Dialog>
-                        ) : (
+                    {/* Follow Button - Only show for other profiles */}
+                    {!isOwnProfile && (
+                        <div className="mt-4">
                             <Button
                                 className={`w-full sm:w-auto py-3 px-6 rounded-full flex items-center justify-center ${isFollowing ? "bg-gray-400 text-white" : "bg-gradient-redwhiteblued text-white"}`}
                                 onClick={handleFollowToggle}
                             >
                                 {isFollowing ? "Unfollow" : "Follow"}
                             </Button>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="space-y-6 flex-1">
@@ -348,6 +264,97 @@ export default function ProfilePage() {
                     )}
                 </div>
             </div>
+
+            {/* Edit Modal */}
+            {isOwnProfile && (
+                <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+                    <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle>Edit Profile</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <InputField label="Full Name" value={formData.fullname} onChange={(val) => handleInputChange("fullname", val)} />
+                                <InputField label="Email" value={formData.email} onChange={(val) => handleInputChange("email", val)} />
+                                <InputField label="Location" value={formData.location} onChange={(val) => handleInputChange("location", val)} />
+                                <SelectField label="Age" options={ageRangeOptions} value={formData.age} onChange={(val) => handleInputChange("age", val)} />
+                                <SelectField
+                                    label="Role"
+                                    options={[
+                                        { value: "player", label: "Player" },
+                                        { value: "team", label: "Team" },
+                                        { value: "admin", label: "Admin" }
+                                    ]}
+                                    value={formData.role}
+                                    onChange={(val) => handleInputChange("role", val)}
+                                />
+                                <div className="space-y-3">
+                                    <Label htmlFor="positions">Position(s)</Label>
+                                    <Popover open={positionSelectOpen} onOpenChange={setPositionSelectOpen}>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                role="combobox"
+                                                aria-expanded={positionSelectOpen}
+                                                className="w-full justify-between"
+                                            >
+                                                {formData.positions.length > 0
+                                                    ? `${formData.positions.length} position(s) selected`
+                                                    : "Select positions..."}
+                                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-full p-0">
+                                            <Command>
+                                                <CommandInput placeholder="Search positions..." />
+                                                <CommandList>
+                                                    <CommandEmpty>No positions found.</CommandEmpty>
+                                                    <CommandGroup>
+                                                        {positionOptions.map((position) => (
+                                                            <CommandItem
+                                                                key={position}
+                                                                value={position}
+                                                                onSelect={() => {
+                                                                    if (formData.positions.includes(position)) {
+                                                                        setFormData({
+                                                                            ...formData,
+                                                                            positions: formData.positions.filter(p => p !== position)
+                                                                        });
+                                                                    } else {
+                                                                        setFormData({
+                                                                            ...formData,
+                                                                            positions: [...formData.positions, position]
+                                                                        });
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <Check
+                                                                    className={`mr-2 h-4 w-4 ${formData.positions.includes(position) ? "opacity-100" : "opacity-0"
+                                                                        }`}
+                                                                />
+                                                                {position}
+                                                            </CommandItem>
+                                                        ))}
+                                                    </CommandGroup>
+                                                </CommandList>
+                                            </Command>
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+                                <SelectField label="Experience Level" options={experienceLevelOptions} value={formData.experienceLevel} onChange={(val) => handleInputChange("experienceLevel", val)} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="bio">Bio</Label>
+                                <Textarea id="bio" value={formData.bio} onChange={(e) => handleInputChange("bio", e.target.value)} rows={4} />
+                            </div>
+                            <div className="flex justify-end space-x-2 pt-4">
+                                <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>Cancel</Button>
+                                <Button onClick={handleSaveProfile} className="bg-gradient-redwhiteblued">Save Changes</Button>
+                            </div>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+            )}
         </div>
     )
 }
