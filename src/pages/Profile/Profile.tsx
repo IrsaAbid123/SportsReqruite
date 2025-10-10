@@ -152,6 +152,7 @@ export default function ProfilePage() {
                     </Avatar>
                 </div>
 
+
                 <div className="flex flex-col w-full gap-4">
                     <div className="flex-1">
                         {/* Name and Edit Button */}
@@ -160,6 +161,7 @@ export default function ProfilePage() {
                                 <p className="text-lg sm:text-xl font-bold">{profileUser?.fullname}</p>
                                 {profileUser?.verified && <Badge variant="default" className="bg-green-500 w-fit">Verified</Badge>}
                             </div>
+
 
                             {/* Edit Button - Only show for own profile */}
                             {isOwnProfile && (
@@ -183,7 +185,12 @@ export default function ProfilePage() {
                             <Badge variant="outline" className="capitalize">{profileUser?.role}</Badge>
                             {profileUser?.position && <Badge variant="secondary" className="capitalize">{profileUser.position}</Badge>}
                         </div>
-
+                        <div className="flex items-center text-sm mb-4">
+                            <svg className="w-4 h-4 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                            </svg>
+                            <a href={`mailto:${profileUser?.email}`} className="text-gray-400 hover:underline break-all">{profileUser?.email}</a>
+                        </div>
                         {/* Age/Experience */}
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3">
                             {profileUser?.age && <span className="text-sm text-gray-600">Age: <span className="font-medium">{profileUser.age}</span></span>}
@@ -214,36 +221,28 @@ export default function ProfilePage() {
                                 </span>
                             </span>
                         </div>
+
+                        {/* Email */}
+
+
+                        {/* Follow Button - Only show for other profiles */}
+                        {!isOwnProfile && (
+                            <div className="mt-4">
+                                <Button
+                                    className={`w-full sm:w-auto py-3 px-6 rounded-full flex items-center justify-center ${isFollowing ? "bg-gray-400 text-white" : "bg-gradient-redwhiteblued text-white"}`}
+                                    onClick={handleFollowToggle}
+                                >
+                                    {isFollowing ? "Unfollow" : "Follow"}
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </section>
 
             {/* Profile Posts */}
-            <div className="container flex flex-col lg:flex-row px-4 sm:px-8 lg:px-32 py-6 sm:py-10 gap-6 lg:gap-10">
-                <div className="p-4 sm:p-6">
-                    <div className="space-y-3 mb-5">
-                        <div className="flex items-center text-sm">
-                            <svg className="w-4 h-4 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
-                            </svg>
-                            <a href={`mailto:${profileUser?.email}`} className="text-gray-400 hover:underline break-all">{profileUser?.email}</a>
-                        </div>
-                    </div>
-
-                    {/* Follow Button - Only show for other profiles */}
-                    {!isOwnProfile && (
-                        <div className="mt-4">
-                            <Button
-                                className={`w-full sm:w-auto py-3 px-6 rounded-full flex items-center justify-center ${isFollowing ? "bg-gray-400 text-white" : "bg-gradient-redwhiteblued text-white"}`}
-                                onClick={handleFollowToggle}
-                            >
-                                {isFollowing ? "Unfollow" : "Follow"}
-                            </Button>
-                        </div>
-                    )}
-                </div>
-
-                <div className="space-y-6 flex-1">
+            <div className="container px-4 sm:px-8 lg:px-32 py-6 sm:py-10">
+                <div className="space-y-6">
                     <div className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-redwhiteblued bg-clip-text text-transparent">
                         {isOwnProfile ? "My Posts" : `${profileUser?.fullname}'s Posts`}
                     </div>

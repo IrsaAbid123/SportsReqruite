@@ -3,14 +3,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ShareCard } from "@/pages/PostCreation/ShareCard";
-import { Calendar, MapPin, Clock, Star, Users, Share2, Heart, MessageCircle, Edit, Trash2 } from "lucide-react";
+import { Calendar, MapPin, Clock, Star, Users, Share2, Heart, MessageCircle, Edit, Trash2, Mail, Copy, Check } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSendNotificationMutation } from "@/redux/ApiCalls/notificationApi";
 import { useLikePostMutation, useUnlikePostMutation, useDeletePostMutation, useGetPostQuery } from "@/redux/ApiCalls/postApi";
+import { useGetUserQuery } from "@/redux/ApiCalls/userApi";
 import { useUser } from "@/context/UserContext";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 export interface Listing {
   _id: string;
@@ -62,10 +64,27 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
   const { user } = useUser()
   const [shareOpen, setShareOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  const [emailCopied, setEmailCopied] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [sendNotification, { isLoading: isSendingNotification }] = useSendNotificationMutation()
   const [likePost, { isLoading: isLiking }] = useLikePostMutation()
   const [unlikePost, { isLoading: isUnliking }] = useUnlikePostMutation()
   const [deletePost, { isLoading: isDeleting }] = useDeletePostMutation()
+
+  // Fetch user data when contact dialog is opened
+  const { data: contactUserResponse, isLoading: isLoadingUser } = useGetUserQuery(selectedUserId!, {
+    skip: !selectedUserId
+  });
+
+  // Extract user data from the nested response
+  const contactUserData = contactUserResponse?.user;
+
+  // Debug: Log the response to see the data structure
+  if (contactUserResponse) {
+    console.log('Contact User Response:', contactUserResponse);
+    console.log('Contact User Data:', contactUserData);
+  }
 
   // Local state for optimistic updates
   const [localIsLiked, setLocalIsLiked] = useState(
@@ -102,29 +121,35 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
       return;
     }
 
-    // Store contact info in localStorage for when user returns
-    const contactInfo = {
-      targetUserId: listing.author._id,
-      targetUserName: authorName,
-      postTitle: listing.title,
-      contactTime: new Date().toISOString()
-    };
-
-    localStorage.setItem('pendingContact', JSON.stringify(contactInfo));
-
-    // Navigate to email with the user's email
-    const emailSubject = encodeURIComponent(`Interested in your post: ${listing.title}`);
-    const emailBody = encodeURIComponent(`Hi ${authorName},\n\nI'm interested in your post: "${listing.title}"\n\nBest regards,\n${user.fullname}`);
-
-    // Try to get email from listing author, fallback to a generic message
-    const emailAddress = listing.author.email || 'contact@sportsrecruit.com';
-    const mailtoLink = `mailto:${emailAddress}?subject=${emailSubject}&body=${emailBody}`;
-
-    // Open email client
-    window.open(mailtoLink, '_blank');
+    // Set the user ID to fetch and open contact dialog
+    setSelectedUserId(listing.author._id);
+    setContactDialogOpen(true);
 
     // Call the original onContact callback if provided
     onContact?.(listing._id);
+  };
+
+  const handleCopyEmail = async () => {
+    const emailAddress = contactUserData?.email || 'contact@sportsrecruit.com';
+    try {
+      await navigator.clipboard.writeText(emailAddress);
+      setEmailCopied(true);
+      toast.success("Email address copied to clipboard!");
+      setTimeout(() => setEmailCopied(false), 2000);
+    } catch (error) {
+      toast.error("Failed to copy email address");
+    }
+  };
+
+  const handleOpenEmailClient = () => {
+    const contactUserName = contactUserData?.fullname || authorName;
+    const emailSubject = encodeURIComponent(`Interested in your post: ${listing.title}`);
+    const emailBody = encodeURIComponent(`Hi ${contactUserName},\n\nI'm interested in your post: "${listing.title}"\n\nBest regards,\n${user?.fullname}`);
+    const emailAddress = contactUserData?.email || 'contact@sportsrecruit.com';
+    const mailtoLink = `mailto:${emailAddress}?subject=${emailSubject}&body=${emailBody}`;
+
+    window.open(mailtoLink, '_blank');
+    setContactDialogOpen(false);
   };
 
   const handleLike = async () => {
@@ -313,13 +338,13 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
               />
               <span className="text-sm">{localLikesCount}</span>
             </button>
-            <button
+            {/* <button
               onClick={handleCommentClick}
               className="flex items-center space-x-1 text-muted-foreground hover:text-blue-500 transition-colors"
             >
               <MessageCircle className="h-4 w-4" />
               <span className="text-sm">{commentsCount}</span>
-            </button>
+            </button> */}
           </div>
 
           {/* Actions */}
@@ -382,6 +407,106 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
           <ShareCard open={shareOpen} onOpenChange={setShareOpen} url={shareUrl} />
         </div>
       </CardContent>
+
+      {/* Contact Dialog */}
+      <Dialog open={contactDialogOpen} onOpenChange={setContactDialogOpen}>
+        <DialogContent className="w-[95vw] max-w-md sm:max-w-lg md:max-w-xl mx-auto max-h-[90vh] overflow-y-auto rounded-xl p-4 sm:p-6">
+          <DialogHeader className="pb-4">
+            <DialogTitle className="flex items-center gap-2 text-base sm:text-lg md:text-xl">
+              <Mail className="h-5 w-5 text-primary flex-shrink-0" />
+              <span className="truncate">Contact {contactUserData?.role === "player" ? "Player" : "Team"}</span>
+            </DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm md:text-base break-words leading-snug">
+              Get in touch with {contactUserData?.fullname || authorName} regarding their post: "{listing.title}"
+            </DialogDescription>
+          </DialogHeader>
+
+          {isLoadingUser ? (
+            <div className="flex items-center justify-center py-8 min-h-[200px]">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                <p className="text-sm text-muted-foreground">Loading user information...</p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3 sm:space-y-4">
+              {/* User Details */}
+              <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-secondary/30 rounded-lg flex-wrap">
+                <Avatar className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
+                  <AvatarImage src={contactUserData?.avatar} alt={contactUserData?.fullname || authorName} />
+                  <AvatarFallback className="bg-gradient-accent text-accent-foreground font-semibold text-sm">
+                    {(contactUserData?.fullname || authorName).charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold text-foreground text-sm sm:text-base truncate">
+                    {contactUserData?.fullname || authorName}
+                  </h4>
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Badge variant={contactUserData?.role === 'player' ? 'secondary' : 'outline'} className="text-xs">
+                        {contactUserData?.role === 'player' ? 'Player' : 'Team/Coach'}
+                      </Badge>
+                      <span className="flex items-center">
+                        <Star className="h-3 w-3 mr-1" />
+                        {contactUserData?.experienceLevel || authorExperience}
+                      </span>
+                    </div>
+                    <span className="flex items-center">
+                      <MapPin className="h-3 w-3 mr-1" />
+                      <span className="truncate">{contactUserData?.location || authorLocation}</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Email Information */}
+              <div className="space-y-2 sm:space-y-3">
+                <div className="p-3 sm:p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                  <h5 className="font-medium text-foreground mb-2 text-sm sm:text-base">Contact Information</h5>
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-3">
+                    You can reach out to {contactUserData?.fullname || authorName} directly via email to discuss this opportunity further.
+                  </p>
+                  <div className="p-3 sm:p-4 bg-background border-2 border-primary/30 rounded-lg">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                        <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs text-muted-foreground mb-1">Email Address</p>
+                          <p className="font-mono text-sm sm:text-lg font-semibold text-foreground break-all">
+                            {contactUserData?.email || 'contact@sportsrecruit.com'}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCopyEmail}
+                        className="flex items-center justify-center gap-2 w-full sm:w-auto"
+                      >
+                        {emailCopied ? <Check className="h-3 w-3 sm:h-4 sm:w-4" /> : <Copy className="h-3 w-3 sm:h-4 sm:w-4" />}
+                        <span className="text-xs sm:text-sm">{emailCopied ? "Copied!" : "Copy"}</span>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2 pt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setContactDialogOpen(false)}
+                  className="flex-1"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
