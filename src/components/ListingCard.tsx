@@ -349,14 +349,14 @@ export const ListingCard = ({ listing, onContact, onSave }: ListingCardProps) =>
 
           {/* Actions */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-2 gap-3">
-            <Button
+            {/* <Button
               variant="ghost"
               size="sm"
               onClick={() => onSave?.(listing._id)}
               className="text-black hover:text-foreground w-full sm:w-auto"
             >
               Save
-            </Button>
+            </Button> */}
 
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               {/* Edit and Delete buttons for post author */}
