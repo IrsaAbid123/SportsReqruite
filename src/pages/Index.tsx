@@ -35,13 +35,15 @@ const Index = () => {
     status: 'all'
   });
 
-  // Prepare filter parameters for the API
+  // Prepare filter parameters for the API - send each value separately
   const filterParams = {
-    experienceLevel: filters.experience.length > 0 ? filters.experience[0] : undefined,
-    age: filters.age.length > 0 ? filters.age[0] : undefined,
-    position: filters.position.length > 0 ? filters.position[0] : undefined,
+    experience: filters.experience.length > 0 ? filters.experience : undefined,
+    age: filters.age.length > 0 ? filters.age : undefined,
+    position: filters.position.length > 0 ? filters.position : undefined,
     location: filters.zipOrCityState || undefined,
-    role: filters.userType !== 'all' ? filters.userType : undefined,
+    role: filters.userType !== 'all' ? [filters.userType] : undefined,
+    status: filters.status !== 'all' ? [filters.status] : undefined,
+    distance: filters.distance > 0 ? [filters.distance.toString()] : undefined,
   };
 
   const [getFilteredPosts, { isLoading: isFilterLoading }] = useGetFilteredPostsMutation();
